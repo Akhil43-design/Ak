@@ -104,7 +104,11 @@
     async function loadStore() {
         try {
             const res = await fetch(`/api/stores/${storeId}`);
-            const store = await res.json();
+            let store = await res.json();
+            
+            // Handle null/missing store
+            if (!store || store.error) store = {};
+
             const nameEl = document.getElementById('store-name');
             const descEl = document.getElementById('store-description');
             
