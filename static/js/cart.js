@@ -84,17 +84,58 @@ function createCartItem(productId, item) {
                 <span class="text-lg font-bold text-primary">₹${parseFloat(item.price).toFixed(2)}</span>
             </div>
             <div class="flex items-center justify-between pt-4">
-                <div class="flex items-center bg-surface-container-low rounded-full px-2 py-1">
-                    <span class="px-4 font-semibold text-sm">Qty: ${item.quantity}</span>
+                <div class="flex items-center bg-surface-container-low rounded-full px-1 py-1 border border-primary/10">
+                    <button onclick="updateQuantity('${productId}', -1)" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-primary/10 text-primary transition-colors">
+                        <span class="material-symbols-outlined text-sm">remove</span>
+                    </button>
+                    <span id="qty-${productId}" class="px-4 font-black text-sm text-gray-800 min-w-[3rem] text-center">${item.quantity}</span>
+                    <button onclick="updateQuantity('${productId}', 1)" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-primary/10 text-primary transition-colors">
+                        <span class="material-symbols-outlined text-sm">add</span>
+                    </button>
                 </div>
-                <button class="flex items-center gap-2 text-error text-sm font-medium hover:opacity-70 transition-opacity" onclick="removeFromCart('${productId}')">
-                    <span class="material-symbols-outlined text-lg">delete</span> Remove
+                <button class="flex items-center gap-2 text-red-500 text-xs font-bold hover:opacity-70 transition-opacity" onclick="removeFromCart('${productId}')">
+                    <span class="material-symbols-outlined text-base">delete</span> Remove
                 </button>
             </div>
         </div>
     `;
 
     return div;
+}
+
+// Update quantity
+async function updateQuantity(productId, delta) {
+    try {
+        const qtyEl = document.getElementById(`qty-${productId}`);
+        if (!qtyEl) return;
+        
+        let currentQty = parseInt(qtyEl.textContent);
+        let newQty = currentQty + delta;
+        
+        if (newQty < 1) return; // Minimum 1
+
+        // Update UI immediately for responsiveness
+        qtyEl.textContent = newQty;
+
+        const response = await fetch('/api/cart', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                product_id: productId,
+                quantity: newQty // API expects the absolute new quantity
+            })
+        });
+
+        if (response.ok) {
+            loadCart(); // Refresh totals
+        } else {
+            // Revert on failure
+            qtyEl.textContent = currentQty;
+            alert('Failed to update quantity');
+        }
+    } catch (error) {
+        console.error('Error updating quantity:', error);
+    }
 }
 
 // Remove from cart
