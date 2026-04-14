@@ -533,8 +533,9 @@ def create_order_api():
         'order_id': order_id,
         'user_id': user_id,
         'items': data.get('items'),
-        'total': data.get('total'),
-        'delivery_method': data.get('delivery_method'),
+        'total': float(data.get('total', 0)),
+        'delivery_method': data.get('delivery_method', 'self_pickup'),
+        'payment_method': data.get('payment_method', 'cod'),
         'address': data.get('address', ''),
         'status': 'confirmed',
         'created_at': datetime.now().isoformat()
@@ -545,49 +546,38 @@ def create_order_api():
     
     # Add to user's orders
     firebase.add_order_to_user(user_id, order_id, {
-        'total': data.get('total'),
-        'created_at': datetime.now().isoformat()
+        'total': order_data['total'],
+        'created_at': order_data['created_at'],
+        'status': 'confirmed'
     })
     
     # Add to relevant stores
     items = data.get('items', [])
     store_orders = {}
     
-    # Group items by store
     for item in items:
         store_id = item.get('store_id')
         if store_id:
             if store_id not in store_orders:
-                store_orders[store_id] = {
-                    'items': [],
-                    'total': 0
-                }
-            
+                store_orders[store_id] = {'items': [], 'total': 0}
             store_orders[store_id]['items'].append(item)
-            # Calculate store-specific total
-            item_total = float(item.get('price', 0)) * int(item.get('quantity', 1))
-            store_orders[store_id]['total'] += item_total
+            store_orders[store_id]['total'] += float(item.get('price', 0)) * int(item.get('quantity', 1))
             
-    # Get customer email
     customer_email = session.get('email', 'Unknown')
 
-    for store_id, store_data in store_orders.items():
-        firebase.add_order_to_store(store_id, order_id, {
+    for s_id, s_data in store_orders.items():
+        firebase.add_order_to_store(s_id, order_id, {
             'user_id': user_id,
             'customer_email': customer_email,
-            'items': store_data['items'],
-            'total': store_data['total'],
+            'items': s_data['items'],
+            'total': s_data['total'],
+            'payment_method': order_data['payment_method'],
             'status': 'confirmed',
-            'created_at': datetime.now().isoformat()
+            'created_at': order_data['created_at']
         })
     
-    # Clear cart
     firebase.clear_cart(user_id)
-    
-    return jsonify({
-        'success': True,
-        'order_id': order_id
-    })
+    return jsonify({'success': True, 'order_id': order_id})
 
 @app.route('/api/orders/<order_id>', methods=['GET'])
 @login_required

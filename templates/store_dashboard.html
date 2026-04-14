@@ -114,8 +114,24 @@
             </div>
         </div>
 
-        <!-- Customer Requests Panel -->
+        <!-- Recent Orders & Requests -->
         <div class="space-y-6">
+            <!-- Recent Orders Panel -->
+            <div class="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100 p-5 sm:p-6 text-left">
+                <h3 class="text-base font-bold mb-1 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-blue-500">shopping_bag</span> Recent Orders
+                </h3>
+                <p class="text-[10px] text-gray-400 mb-4 uppercase tracking-wider font-bold">New sales from your store</p>
+                
+                <div id="orders-container" class="space-y-3">
+                    <div class="text-center py-6 text-gray-300">
+                        <span class="material-symbols-outlined text-3xl block mb-2 animate-pulse">sync</span>
+                        <p class="text-xs italic">Syncing orders...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Requests Panel -->
             <div class="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100 p-5 sm:p-6 text-left">
                 <h3 class="text-base font-bold mb-1 flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary">contact_support</span> Customer Requests
@@ -136,7 +152,7 @@
                 <h4 class="font-bold mb-2 flex items-center gap-2 text-sm">
                     <span class="material-symbols-outlined text-base text-secondary">verified</span> Owner Tip
                 </h4>
-                <p class="text-xs text-green-100 leading-relaxed">Check requests frequently to understand what items local villagers and visitors are looking for.</p>
+                <p class="text-xs text-green-100 leading-relaxed">Check orders and requests frequently to stay ahead of local demand and provide great service.</p>
             </div>
         </div>
     </div>

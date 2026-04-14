@@ -17,6 +17,7 @@ async function checkStoreRegistration() {
         loadProducts();
         loadAnalytics();
         loadRequests();
+        loadOrders();
         return;
     }
     // 2. Ask server
@@ -30,6 +31,7 @@ async function checkStoreRegistration() {
             loadProducts();
             loadAnalytics();
             loadRequests();
+            loadOrders();
         } else {
             showRegisterModal();
         }
@@ -314,5 +316,55 @@ async function loadRequests() {
         `).join('');
     } catch (e) {
         console.error('Requests error:', e);
+    }
+}
+
+// ─── ORDERS ──────────────────────────────────────────────────
+async function loadOrders() {
+    const container = document.getElementById('orders-container');
+    if (!container || !currentStoreId) return;
+
+    try {
+        const res = await fetch(`/api/stores/${currentStoreId}/orders`);
+        const data = await res.json();
+        
+        let orders = [];
+        if (Array.isArray(data)) {
+            orders = data;
+        } else if (data && typeof data === 'object' && !data.error) {
+            orders = Object.entries(data).map(([id, val]) => ({ id, ...val }));
+        }
+
+        // Sort by created_at (latest first)
+        orders.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+
+        if (orders.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-6 text-gray-300">
+                    <span class="material-symbols-outlined text-3xl block mb-2">shopping_bag</span>
+                    <p class="text-xs italic font-medium">No orders yet.</p>
+                </div>`;
+            return;
+        }
+
+        container.innerHTML = orders.slice(0, 10).map(o => `
+            <div class="p-3 rounded-xl bg-gray-50 border border-gray-100 mb-2">
+                <div class="flex justify-between items-start mb-1">
+                    <span class="font-bold text-[10px] text-gray-400">#${(o.id || o.order_id || '').substring(0,8)}</span>
+                    <span class="text-[10px] font-black text-green-600 bg-green-50 px-2 py-0.5 rounded-full uppercase">Paid</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <div class="min-w-0 flex-1">
+                        <p class="font-bold text-xs text-gray-800 truncate">${o.customer_email || 'Guest'}</p>
+                        <p class="text-[10px] text-gray-400">${new Date(o.created_at).toLocaleString([], {hour:'2-digit', minute:'2-digit', month:'short', day:'numeric'})}</p>
+                    </div>
+                    <div class="text-right ml-3">
+                        <p class="font-black text-xs text-primary">₹${parseFloat(o.total || 0).toFixed(2)}</p>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    } catch (e) {
+        console.error('Orders error:', e);
     }
 }

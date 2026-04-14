@@ -133,71 +133,57 @@ async function loadCheckout() {
 
         const checkoutItems = document.getElementById('checkout-items');
         let total = 0;
+        let totalItems = 0;
 
         checkoutItems.innerHTML = '';
 
         for (const [productId, item] of Object.entries(cart)) {
             const itemDiv = document.createElement('div');
-            itemDiv.className = 'flex gap-4 mb-4';
+            itemDiv.className = 'flex items-center gap-4 py-3 border-b border-gray-50 last:border-0';
             const imageUrl = item.image || 'https://via.placeholder.com/80x80?text=No+Image';
             itemDiv.innerHTML = `
-                <div class="w-20 h-20 bg-white rounded-xl overflow-hidden flex-shrink-0 relative">
-                    <div class="absolute inset-0 bg-primary-container opacity-5"></div>
+                <div class="w-14 h-14 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0 relative border border-gray-100">
                     <img class="w-full h-full object-cover" src="${imageUrl}" alt="${item.product_name}" />
                 </div>
-                <div class="flex-1">
-                    <h4 class="text-sm font-semibold text-on-surface">${item.product_name}</h4>
-                    <p class="text-xs text-on-surface-variant">Qty: ${item.quantity}</p>
-                    <p class="text-sm font-bold mt-1 text-primary">₹${(item.price * item.quantity).toFixed(2)}</p>
+                <div class="flex-1 min-w-0">
+                    <h4 class="text-xs font-bold text-gray-800 truncate">${item.product_name}</h4>
+                    <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider">Qty: ${item.quantity} · ₹${item.price}</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs font-black text-gray-900">₹${(item.price * item.quantity).toFixed(2)}</p>
                 </div>
             `;
             if (checkoutItems) checkoutItems.appendChild(itemDiv);
             total += item.price * item.quantity;
+            totalItems += item.quantity;
         }
 
         const checkoutTotal = document.getElementById('checkout-total');
         if (checkoutTotal) checkoutTotal.textContent = `₹${total.toFixed(2)}`;
-        
-        const checkoutTotalSub = document.getElementById('checkout-total-sub');
-        if (checkoutTotalSub) checkoutTotalSub.textContent = `₹${total.toFixed(2)}`;
     } catch (error) {
         console.error('Error loading checkout:', error);
     }
 }
 
-// Toggle address field
-function toggleAddress() {
-    const deliveryMethod = document.getElementById('delivery-method').value;
-    const addressSection = document.getElementById('address-section');
-
-    if (deliveryMethod === 'home_delivery') {
-        addressSection.style.display = 'block';
-        document.getElementById('delivery-address').required = true;
-    } else {
-        addressSection.style.display = 'none';
-        document.getElementById('delivery-address').required = false;
-    }
-}
-
-// Handle checkout
+// Handle checkout submission
 async function handleCheckout(event) {
     if (event) event.preventDefault();
 
-    let deliveryMethod = 'home_delivery'; // Default
-    const deliveryMethodEl = document.querySelector('input[name="payment"]:checked');
-    if (deliveryMethodEl && deliveryMethodEl.value === 'cod') {
-        deliveryMethod = 'cod';
-    }
+    const btn = document.getElementById('confirm-order-btn');
+    const originalText = btn.innerHTML;
 
-    const addressEl = document.getElementById('delivery-address');
-    const address = addressEl ? addressEl.value : '';
+    // Get payment method
+    const paymentMethodEl = document.querySelector('input[name="payment-method"]:checked');
+    const paymentMethod = paymentMethodEl ? paymentMethodEl.value : 'cod';
+
+    // Simple validation (can be expanded)
+    btn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span> Processing...';
+    btn.disabled = true;
 
     try {
-        // Get cart
         const cartResponse = await fetch('/api/cart');
         const cart = await cartResponse.json();
 
-        // Calculate total
         let total = 0;
         const items = [];
 
@@ -205,27 +191,22 @@ async function handleCheckout(event) {
             total += item.price * item.quantity;
             items.push({
                 product_id: productId,
-                store_id: item.store_id, // Include store_id
+                store_id: item.store_id,
                 product_name: item.product_name,
                 price: item.price,
                 quantity: item.quantity
             });
         }
 
-        // Create order
-        const orderData = {
-            items: items,
-            total: total,
-            delivery_method: deliveryMethod,
-            address: address
-        };
-
         const orderResponse = await fetch('/api/orders', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(orderData)
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                items: items,
+                total: total,
+                payment_method: paymentMethod,
+                delivery_method: 'self_pickup' // or get from UI
+            })
         });
 
         const orderResult = await orderResponse.json();
@@ -233,11 +214,15 @@ async function handleCheckout(event) {
         if (orderResult.success) {
             window.location.href = `/receipt/${orderResult.order_id}`;
         } else {
-            alert('Failed to place order');
+            alert(orderResult.error || 'Failed to place order');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('An error occurred');
+        alert('An error occurred during checkout');
+        btn.innerHTML = originalText;
+        btn.disabled = false;
     }
 }
 

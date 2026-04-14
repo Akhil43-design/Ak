@@ -9,10 +9,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script>
     tailwind.config = {
-        theme: { extend: { colors: { primary: '#2e7d32', secondary: '#ef6c00', surface: '#fbfaf8' }, fontFamily: { sans: ['Poppins','sans-serif'] } } }
+        theme: { 
+            extend: { 
+                colors: { primary: '#2e7d32', secondary: '#ef6c00', surface: '#fbfaf8' }, 
+                fontFamily: { sans: ['Poppins','sans-serif'] } 
+            } 
+        }
     }
 </script>
-<style>.material-symbols-outlined { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }</style>
+<style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    input[type="radio"]:checked + label { border-color: #2e7d32; background-color: #f0fdf4; }
+</style>
 </head>
 <body class="bg-surface font-sans min-h-screen flex flex-col">
 
@@ -31,37 +39,98 @@
 
 <main class="flex-1 max-w-2xl mx-auto w-full px-4 py-6 pb-32">
 
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-5">
+    <!-- Order Summary Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
         <div class="p-5 border-b border-gray-100">
-            <h2 class="font-bold text-gray-900">Order Summary</h2>
+            <h2 class="font-bold text-gray-900 flex items-center gap-2 text-sm italic">
+                <span class="material-symbols-outlined text-primary">shopping_basket</span> Order Summary
+            </h2>
         </div>
-        <div id="checkout-items" class="p-5 space-y-3">
-            <p class="text-gray-400 text-sm italic">Loading order...</p>
+        <div id="checkout-items" class="p-5 space-y-4">
+            <div class="flex items-center justify-center py-6 text-gray-400">
+                <span class="material-symbols-outlined animate-spin mr-2">progress_activity</span>
+                <p class="text-xs font-medium uppercase tracking-wider">Loading your order...</p>
+            </div>
         </div>
-        <div class="px-5 pb-5">
-            <div class="flex justify-between items-center py-4 border-t border-gray-100">
-                <span class="text-gray-500 font-medium text-sm">Total Amount</span>
+        <div class="px-5 pb-5 pt-2 border-t border-gray-100 bg-gray-50/50">
+            <div class="flex justify-between items-center">
+                <span class="text-gray-500 font-bold text-xs uppercase tracking-widest">Total Amount</span>
                 <span id="checkout-total" class="text-2xl font-black text-gray-900">₹0</span>
             </div>
         </div>
     </div>
 
-    <div class="bg-green-50 rounded-2xl p-4 flex items-start gap-3 mb-5 border border-green-100">
-        <span class="material-symbols-outlined text-primary text-xl flex-shrink-0 mt-0.5">volunteer_activism</span>
-        <p class="text-xs text-green-800 leading-relaxed">By placing this order, you are directly supporting authentic Indian village artisans and farmers. Every rupee counts!</p>
+    <!-- Payment Methods Section -->
+    <div class="mb-8">
+        <h3 class="text-sm font-bold text-gray-900 mb-4 px-1 flex items-center gap-2">
+            <span class="material-symbols-outlined text-secondary">payments</span> Select Payment Method
+        </h3>
+        <div class="space-y-3">
+            <!-- COD -->
+            <div class="relative">
+                <input type="radio" id="pay-cod" name="payment-method" value="cod" class="hidden peer" checked />
+                <label for="pay-cod" class="flex items-center gap-4 p-4 bg-white border-2 border-gray-100 rounded-2xl cursor-pointer hover:border-primary/30 transition-all peer-checked:border-primary peer-checked:bg-green-50 shadow-sm">
+                    <div class="w-12 h-12 bg-orange-100 text-secondary rounded-xl flex items-center justify-center">
+                        <span class="material-symbols-outlined">payments</span>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-bold text-gray-900 text-sm">Cash on Delivery</p>
+                        <p class="text-[10px] text-gray-500 font-medium">Pay when you receive the items</p>
+                    </div>
+                    <div class="w-5 h-5 border-2 border-gray-300 rounded-full flex items-center justify-center peer-checked:border-primary">
+                        <div class="w-2.5 h-2.5 bg-primary rounded-full hidden peer-checked:block"></div>
+                    </div>
+                </label>
+            </div>
+
+            <!-- UPI -->
+            <div class="relative">
+                <input type="radio" id="pay-upi" name="payment-method" value="upi" class="hidden peer" />
+                <label for="pay-upi" class="flex items-center gap-4 p-4 bg-white border-2 border-gray-100 rounded-2xl cursor-pointer hover:border-primary/30 transition-all peer-checked:border-primary peer-checked:bg-green-50 shadow-sm">
+                    <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
+                        <span class="material-symbols-outlined">qr_code_2</span>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-bold text-gray-900 text-sm">UPI / Google Pay</p>
+                        <p class="text-[10px] text-gray-500 font-medium">Scan & Pay using any UPI app</p>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Card -->
+            <div class="relative">
+                <input type="radio" id="pay-card" name="payment-method" value="card" class="hidden peer" />
+                <label for="pay-card" class="flex items-center gap-4 p-4 bg-white border-2 border-gray-100 rounded-2xl cursor-pointer hover:border-primary/30 transition-all peer-checked:border-primary peer-checked:bg-green-50 shadow-sm">
+                    <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center">
+                        <span class="material-symbols-outlined">credit_score</span>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-bold text-gray-900 text-sm">Debit / Credit Card</p>
+                        <p class="text-[10px] text-gray-500 font-medium">Secure online card payment</p>
+                    </div>
+                </label>
+            </div>
+        </div>
     </div>
 
-    <button onclick="placeOrder()" class="w-full py-4 bg-primary hover:bg-green-800 text-white font-bold rounded-2xl shadow-xl transition-all flex justify-center items-center gap-2 text-base">
-        <span class="material-symbols-outlined">check_circle</span> Confirm Order
-    </button>
+    <!-- Support Banner -->
+    <div class="bg-gradient-to-br from-green-50 to-green-100/50 rounded-2xl p-5 flex items-start gap-3 mb-8 border border-green-200 shadow-inner">
+        <span class="material-symbols-outlined text-primary text-xl flex-shrink-0 mt-0.5">volunteer_activism</span>
+        <p class="text-[11px] text-green-800 leading-relaxed font-medium">By placing this order, you are directly supporting authentic Indian village artisans and farmers. Thank you for choosing Smart Retail Shopping!</p>
+    </div>
+
+    <!-- Fixed Bottom Action Bar -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 pb-8 z-40">
+        <div class="max-w-2xl mx-auto">
+            <button onclick="handleCheckout()" id="confirm-order-btn" class="w-full py-4 bg-primary hover:bg-green-800 text-white font-bold rounded-2xl shadow-xl transition-all flex justify-center items-center gap-2 text-base">
+                <span class="material-symbols-outlined">verified_user</span> Place Your Order
+            </button>
+        </div>
+    </div>
 </main>
 
-<script src="{{ url_for('static', filename='js/customer.js') }}"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        if (typeof loadCheckout === 'function') loadCheckout();
-    });
-</script>
+<!-- Use cart.js for central checkout logic -->
+<script src="{{ url_for('static', filename='js/cart.js') }}"></script>
 <script src="/static/js/buttons.js"></script>
 </body>
 </html>
