@@ -231,36 +231,55 @@ async function loadReceipt() {
     try {
         const response = await fetch(`/api/orders/${orderId}`);
         const order = await response.json();
-
+        
         const receiptDetails = document.getElementById('receipt-details');
+        if (!receiptDetails) return;
 
-        let itemsHtml = '';
-        for (const item of order.items) {
-            itemsHtml += `
-                <div class="summary-row">
-                    <span>${item.product_name} x${item.quantity}</span>
-                    <span>₹${(item.price * item.quantity).toFixed(2)}</span>
+        let itemsHtml = order.items.map(item => `
+            <div class="flex justify-between items-center py-3 border-b border-gray-50 last:border-0">
+                <div class="min-w-0">
+                    <p class="text-sm font-bold text-gray-800 truncate">${item.product_name}</p>
+                    <p class="text-[10px] text-gray-500 font-medium uppercase">Qty: ${item.quantity} · ₹${parseFloat(item.price).toFixed(2)}</p>
                 </div>
-            `;
-        }
+                <p class="text-sm font-black text-gray-900 ml-4">₹${(item.price * item.quantity).toFixed(2)}</p>
+            </div>
+        `).join('');
+
+        const dateStr = new Date(order.created_at).toLocaleString('en-IN', {
+            day: 'numeric', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
 
         receiptDetails.innerHTML = `
-            <div class="receipt-info">
-                <p><strong>Order ID:</strong> ${order.order_id}</p>
-                <p><strong>Date:</strong> ${new Date(order.created_at).toLocaleString()}</p>
-                <p><strong>Delivery Method:</strong> ${order.delivery_method === 'home_delivery' ? 'Home Delivery' : 'Self Pickup'}</p>
-                ${order.address ? `<p><strong>Address:</strong> ${order.address}</p>` : ''}
-            </div>
-            <div class="receipt-items">
-                <h3>Items</h3>
-                ${itemsHtml}
-                <div class="summary-row total">
-                    <span>Total</span>
-                    <span>₹${parseFloat(order.total).toFixed(2)}</span>
+            <div class="bg-gray-50/50 rounded-2xl p-5 border border-gray-100 space-y-3">
+                <div class="flex justify-between">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Order ID</span>
+                    <span class="text-[10px] font-black text-gray-800">#${order.order_id.substring(0,18)}...</span>
                 </div>
+                <div class="flex justify-between">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Date</span>
+                    <span class="text-[10px] font-black text-gray-800">${dateStr}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Payment</span>
+                    <span class="text-[10px] font-black text-secondary uppercase px-2 py-0.5 bg-orange-50 rounded-full">${order.payment_method || 'COD'}</span>
+                </div>
+            </div>
+
+            <div class="py-2">
+                <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 px-1">Order Items</h3>
+                <div class="space-y-1">
+                    ${itemsHtml}
+                </div>
+            </div>
+
+            <div class="pt-6 border-t border-gray-100 flex justify-between items-center">
+                <span class="text-sm font-bold text-gray-500 uppercase tracking-widest">Amount Paid</span>
+                <span class="text-3xl font-black text-primary">₹${parseFloat(order.total).toFixed(2)}</span>
             </div>
         `;
     } catch (error) {
         console.error('Error loading receipt:', error);
+        document.getElementById('receipt-details').innerHTML = '<p class="text-center text-red-500 py-10 font-bold">Failed to load receipt details.</p>';
     }
 }
