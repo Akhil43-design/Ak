@@ -105,32 +105,38 @@
         try {
             const res = await fetch(`/api/stores/${storeId}`);
             const store = await res.json();
-            if (store && store.name) {
-                document.getElementById('store-name').textContent = store.name;
-                document.getElementById('store-description').textContent = store.description || 'Village-sourced authentic products.';
-                document.title = store.name + ' | Smart Retail Shopping';
-            }
+            const nameEl = document.getElementById('store-name');
+            const descEl = document.getElementById('store-description');
+            
+            const storeName = store.name || 'Village Mart';
+            nameEl.textContent = storeName;
+            descEl.textContent = store.description || 'Village-sourced authentic products.';
+            document.title = storeName + ' | Smart Retail Shopping';
         } catch(e) {
             console.error('Error loading store', e);
+            document.getElementById('store-name').textContent = 'Village Mart';
         }
     }
 
     async function loadProducts() {
         try {
             const res = await fetch(`/api/stores/${storeId}/products`);
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
             const data = await res.json();
             const grid = document.getElementById('products-grid');
             const noProducts = document.getElementById('no-products');
 
             // Normalize data: preserve IDs from Firebase object keys
             let products = [];
-            if (Array.isArray(data)) {
-                products = data;
-            } else if (data && typeof data === 'object' && !data.error) {
-                products = Object.entries(data).map(([id, val]) => ({ id, ...val }));
+            if (data && typeof data === 'object' && !data.error) {
+                if (Array.isArray(data)) {
+                    products = data;
+                } else {
+                    products = Object.entries(data).map(([id, val]) => ({ id, ...val }));
+                }
             }
 
-            if (!products.length) {
+            if (products.length === 0) {
                 grid.innerHTML = '';
                 noProducts.classList.remove('hidden');
                 return;
