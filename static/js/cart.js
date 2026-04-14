@@ -43,31 +43,54 @@ async function loadCart() {
             totalPrice += item.price * item.quantity;
         }
 
-        document.getElementById('total-items').textContent = totalItems;
-        document.getElementById('total-price').textContent = `$${totalPrice.toFixed(2)}`;
+        const itemsEl = document.getElementById('total-items');
+        if (itemsEl) itemsEl.textContent = totalItems;
+        
+        const subLabel = document.getElementById('subtotal-label');
+        if (subLabel) subLabel.textContent = `Subtotal (${totalItems} items)`;
+        
+        const priceSub = document.getElementById('total-price-sub');
+        if (priceSub) priceSub.textContent = `₹${totalPrice.toFixed(2)}`;
+        
+        const totalPriceEl = document.getElementById('total-price');
+        if (totalPriceEl) totalPriceEl.textContent = `₹${totalPrice.toFixed(2)}`;
 
-        cartSummary.style.display = 'block';
+        const headerCount = document.getElementById('header-cart-count');
+        if (headerCount) headerCount.textContent = totalItems;
+
+        if (cartSummary) cartSummary.style.display = 'block';
     } catch (error) {
         console.error('Error loading cart:', error);
     }
 }
 
-// Create cart item
 function createCartItem(productId, item) {
     const div = document.createElement('div');
-    div.className = 'cart-item';
+    div.className = 'bg-surface-container-lowest rounded-xl p-6 flex flex-col md:flex-row items-center gap-6 transition-all duration-300 hover:shadow-[0_20px_40px_rgba(0,55,81,0.06)] group cart-item';
 
     const imageUrl = item.image || 'https://via.placeholder.com/80x80?text=No+Image';
 
     div.innerHTML = `
-        <img src="${imageUrl}" alt="${item.product_name}">
-        <div class="cart-item-info">
-            <h3>${item.product_name}</h3>
-            <div class="product-price">$${parseFloat(item.price).toFixed(2)}</div>
-            <div>Quantity: ${item.quantity}</div>
+        <div class="w-full md:w-32 h-32 rounded-lg bg-surface-container-low overflow-hidden flex-shrink-0 relative">
+            <div class="absolute inset-0 bg-primary-container opacity-5"></div>
+            <img alt="${item.product_name}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="${imageUrl}"/>
         </div>
-        <div class="cart-item-actions">
-            <button class="btn-danger" onclick="removeFromCart('${productId}')">Remove</button>
+        <div class="flex-grow space-y-1 w-full">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h3 class="text-lg font-bold text-on-surface">${item.product_name}</h3>
+                    <p class="text-sm text-on-surface-variant">Store ID: ${item.store_id || 'N/A'}</p>
+                </div>
+                <span class="text-lg font-bold text-primary">₹${parseFloat(item.price).toFixed(2)}</span>
+            </div>
+            <div class="flex items-center justify-between pt-4">
+                <div class="flex items-center bg-surface-container-low rounded-full px-2 py-1">
+                    <span class="px-4 font-semibold text-sm">Qty: ${item.quantity}</span>
+                </div>
+                <button class="flex items-center gap-2 text-error text-sm font-medium hover:opacity-70 transition-opacity" onclick="removeFromCart('${productId}')">
+                    <span class="material-symbols-outlined text-lg">delete</span> Remove
+                </button>
+            </div>
         </div>
     `;
 
@@ -115,16 +138,28 @@ async function loadCheckout() {
 
         for (const [productId, item] of Object.entries(cart)) {
             const itemDiv = document.createElement('div');
-            itemDiv.className = 'summary-row';
+            itemDiv.className = 'flex gap-4 mb-4';
+            const imageUrl = item.image || 'https://via.placeholder.com/80x80?text=No+Image';
             itemDiv.innerHTML = `
-                <span>${item.product_name} x${item.quantity}</span>
-                <span>$${(item.price * item.quantity).toFixed(2)}</span>
+                <div class="w-20 h-20 bg-white rounded-xl overflow-hidden flex-shrink-0 relative">
+                    <div class="absolute inset-0 bg-primary-container opacity-5"></div>
+                    <img class="w-full h-full object-cover" src="${imageUrl}" alt="${item.product_name}" />
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-semibold text-on-surface">${item.product_name}</h4>
+                    <p class="text-xs text-on-surface-variant">Qty: ${item.quantity}</p>
+                    <p class="text-sm font-bold mt-1 text-primary">₹${(item.price * item.quantity).toFixed(2)}</p>
+                </div>
             `;
-            checkoutItems.appendChild(itemDiv);
+            if (checkoutItems) checkoutItems.appendChild(itemDiv);
             total += item.price * item.quantity;
         }
 
-        document.getElementById('checkout-total').textContent = `$${total.toFixed(2)}`;
+        const checkoutTotal = document.getElementById('checkout-total');
+        if (checkoutTotal) checkoutTotal.textContent = `₹${total.toFixed(2)}`;
+        
+        const checkoutTotalSub = document.getElementById('checkout-total-sub');
+        if (checkoutTotalSub) checkoutTotalSub.textContent = `₹${total.toFixed(2)}`;
     } catch (error) {
         console.error('Error loading checkout:', error);
     }
@@ -146,10 +181,16 @@ function toggleAddress() {
 
 // Handle checkout
 async function handleCheckout(event) {
-    event.preventDefault();
+    if (event) event.preventDefault();
 
-    const deliveryMethod = document.getElementById('delivery-method').value;
-    const address = document.getElementById('delivery-address').value;
+    let deliveryMethod = 'home_delivery'; // Default
+    const deliveryMethodEl = document.querySelector('input[name="payment"]:checked');
+    if (deliveryMethodEl && deliveryMethodEl.value === 'cod') {
+        deliveryMethod = 'cod';
+    }
+
+    const addressEl = document.getElementById('delivery-address');
+    const address = addressEl ? addressEl.value : '';
 
     try {
         // Get cart
@@ -213,7 +254,7 @@ async function loadReceipt() {
             itemsHtml += `
                 <div class="summary-row">
                     <span>${item.product_name} x${item.quantity}</span>
-                    <span>$${(item.price * item.quantity).toFixed(2)}</span>
+                    <span>₹${(item.price * item.quantity).toFixed(2)}</span>
                 </div>
             `;
         }
@@ -230,7 +271,7 @@ async function loadReceipt() {
                 ${itemsHtml}
                 <div class="summary-row total">
                     <span>Total</span>
-                    <span>$${parseFloat(order.total).toFixed(2)}</span>
+                    <span>₹${parseFloat(order.total).toFixed(2)}</span>
                 </div>
             </div>
         `;

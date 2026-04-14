@@ -1,38 +1,95 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Cart | Smart Retail Shopping</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+        theme: { extend: { colors: { primary: '#2e7d32', secondary: '#ef6c00', surface: '#fbfaf8' }, fontFamily: { sans: ['Poppins','sans-serif'] } } }
+    }
+</script>
+<style>.material-symbols-outlined { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }</style>
+</head>
+<body class="bg-surface font-sans min-h-screen flex flex-col">
 
-{% block title %}Shopping Cart - Smart QR Shopping{% endblock %}
-
-{% block content %}
-<div class="container">
-    <div class="page-header">
-        <h1>Shopping Cart</h1>
+<!-- Nav -->
+<nav class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
+        <button onclick="window.location.href='/customer/dashboard'" class="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center text-gray-600">
+            <span class="material-symbols-outlined text-xl">arrow_back</span>
+        </button>
+        <span class="font-bold text-primary flex items-center gap-2">
+            <span class="material-symbols-outlined text-xl">shopping_basket</span> My Cart
+        </span>
+        <div class="w-9"></div>
     </div>
+</nav>
 
-    <div id="cart-items" class="cart-container">
-        <!-- Cart items will be loaded here -->
-    </div>
-
-    <div id="empty-cart" class="empty-state" style="display: none;">
-        <h3>Your cart is empty</h3>
-        <p>Start shopping to add items to your cart!</p>
-        <a href="{{ url_for('customer_dashboard') }}" class="btn-primary">Browse Stores</a>
-    </div>
-
-    <div id="cart-summary" class="cart-summary" style="display: none;">
-        <h3>Order Summary</h3>
-        <div class="summary-row">
-            <span>Total Items:</span>
-            <span id="total-items">0</span>
+<main class="flex-1 max-w-2xl mx-auto w-full px-4 py-6 pb-36">
+    <div id="cart-items" class="space-y-3 mb-6">
+        <div class="text-center py-10 text-gray-400">
+            <span class="material-symbols-outlined text-4xl block mb-2">shopping_basket</span>
+            <p class="text-sm">Loading cart...</p>
         </div>
-        <div class="summary-row total">
-            <span>Total:</span>
-            <span id="total-price">$0.00</span>
-        </div>
-        <button onclick="proceedToCheckout()" class="btn-primary btn-block">Proceed to Checkout</button>
     </div>
-</div>
-{% endblock %}
 
-{% block scripts %}
+    <div id="cart-summary" class="hidden bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mt-6">
+        <div class="p-5">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-gray-500 text-sm" id="subtotal-label">Subtotal (0 items)</span>
+                <span id="total-price-sub" class="font-bold">₹0</span>
+            </div>
+            <div class="flex items-center justify-between mb-4 pt-4 border-t border-gray-50">
+                <span class="text-gray-900 font-bold">Total Amount</span>
+                <span id="total-price" class="text-2xl font-black text-primary">₹0</span>
+                <span id="total-items" class="hidden">0</span>
+            </div>
+            <div class="bg-green-50 rounded-xl p-3 flex items-center gap-2 mb-4 text-left">
+                <span class="material-symbols-outlined text-primary text-base">volunteer_activism</span>
+                <p class="text-[10px] text-green-800 font-medium">Your order supports local Indian artisans and village farmers.</p>
+            </div>
+            <button onclick="window.location.href='/checkout'" class="w-full py-3.5 bg-primary hover:bg-green-800 text-white font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-sm">
+                Proceed to Checkout <span class="material-symbols-outlined text-base">arrow_forward</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="empty-cart" class="hidden text-center py-20">
+        <span class="material-symbols-outlined text-5xl text-gray-200 block mb-3">shopping_basket</span>
+        <h3 class="text-xl font-bold text-gray-500">Your cart is empty</h3>
+        <p class="text-gray-400 mt-1">Add items to support village communities.</p>
+        <a href="/customer/dashboard" class="mt-6 inline-flex items-center gap-2 bg-primary text-white py-3 px-6 rounded-xl font-bold hover:bg-green-800 transition-colors shadow-lg">
+            Start Shopping
+        </a>
+    </div>
+</main>
+
+<!-- Bottom Nav -->
+<nav class="fixed bottom-0 inset-x-0 bg-white border-t border-gray-100 flex z-40 shadow-lg">
+    <a href="{{ url_for('customer_dashboard') }}" class="flex-1 flex flex-col items-center justify-center py-3 text-gray-400 hover:text-primary gap-0.5">
+        <span class="material-symbols-outlined text-xl">home</span><span class="text-[10px] font-semibold">Home</span>
+    </a>
+    <a href="{{ url_for('scanner_page') }}" class="flex-1 flex flex-col items-center justify-center py-3 text-gray-400 hover:text-primary gap-0.5">
+        <span class="material-symbols-outlined text-xl">qr_code_scanner</span><span class="text-[10px] font-semibold">Scan</span>
+    </a>
+    <a href="{{ url_for('cart') }}" class="flex-1 flex flex-col items-center justify-center py-3 text-primary gap-0.5">
+        <span class="material-symbols-outlined text-xl">shopping_basket</span><span class="text-[10px] font-semibold">Cart</span>
+    </a>
+    <a href="{{ url_for('logout') }}" class="flex-1 flex flex-col items-center justify-center py-3 text-gray-400 hover:text-primary gap-0.5">
+        <span class="material-symbols-outlined text-xl">logout</span><span class="text-[10px] font-semibold">Logout</span>
+    </a>
+</nav>
+
 <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
-{% endblock %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof loadCart === 'function') loadCart();
+    });
+</script>
+<script src="/static/js/buttons.js"></script>
+</body>
+</html>

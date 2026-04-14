@@ -1,69 +1,136 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Login | Smart Retail Shopping</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { primary: '#2e7d32', secondary: '#ef6c00', surface: '#fbfaf8' },
+                    fontFamily: { sans: ['Poppins', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .hero-bg { background-image: url('https://images.unsplash.com/photo-1604147706283-d7119b5b822c?q=80&w=1887&auto=format&fit=crop'); background-size: cover; background-position: center; }
+    </style>
+</head>
+<body class="bg-surface font-sans min-h-screen flex flex-col lg:flex-row">
 
-{% block title %}Login - Smart QR Shopping{% endblock %}
-
-{% block content %}
-<div class="auth-container">
-    <div class="auth-box">
-        <h1>Welcome to Smart QR Shopping</h1>
-
-        <!-- Tab Navigation -->
-        <div class="auth-tabs">
-            <button class="tab-btn active" onclick="showTab('login')">Login</button>
-            <button class="tab-btn" onclick="showTab('register')">Register</button>
-        </div>
-
-        <!-- Login Form -->
-        <div id="login-form" class="auth-form active">
-            <h2>Login</h2>
-            <form onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="login-email" required>
+    <!-- Form Side -->
+    <div class="w-full lg:w-1/2 flex flex-col justify-center px-6 sm:px-10 lg:px-16 py-12 min-h-screen">
+        <div class="max-w-md w-full mx-auto">
+            <div class="flex items-center gap-3 mb-10">
+                <div class="w-11 h-11 rounded-full bg-primary flex items-center justify-center text-white shadow-lg flex-shrink-0">
+                    <span class="material-symbols-outlined text-xl">storefront</span>
                 </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="login-password" required>
+                <div>
+                    <h1 class="text-xl font-bold text-primary leading-tight">Smart Retail Shopping</h1>
+                    <p class="text-xs text-gray-400">Authentic • Local • Direct</p>
                 </div>
-                <button type="submit" class="btn-primary">Login</button>
+            </div>
+
+            <h2 class="text-2xl sm:text-3xl font-bold mb-1 text-gray-900">Welcome Back 👋</h2>
+            <p class="text-gray-500 mb-8 text-sm">Sign in to access fresh produce and local crafts.</p>
+
+            <div id="message" class="hidden mb-4 p-3 rounded-xl text-sm text-center font-semibold"></div>
+
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold mb-1.5 text-gray-700">Email Address</label>
+                    <div class="relative">
+                        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 material-symbols-outlined text-xl">mail</span>
+                        <input type="email" id="email" required placeholder="you@example.com"
+                            class="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"/>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold mb-1.5 text-gray-700">Password</label>
+                    <div class="relative">
+                        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 material-symbols-outlined text-xl">lock</span>
+                        <input type="password" id="password" required placeholder="••••••••"
+                            class="w-full pl-11 pr-12 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"/>
+                        <button type="button" id="togglePassword" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary">
+                            <span class="material-symbols-outlined text-xl">visibility</span>
+                        </button>
+                    </div>
+                    <div class="text-right mt-1.5">
+                        <a href="#" class="text-xs font-semibold text-primary hover:underline">Forgot Password?</a>
+                    </div>
+                </div>
+                <button type="submit" id="submitBtn"
+                    class="w-full py-3.5 bg-primary hover:bg-green-800 text-white font-bold rounded-xl shadow-lg transition-all flex justify-center items-center gap-2 text-sm mt-2">
+                    <span>Sign In</span>
+                    <span class="material-symbols-outlined text-base">login</span>
+                </button>
             </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-gray-500 text-sm">New to Smart Retail Shopping?
+                    <a href="{{ url_for('register_page') }}" class="text-secondary font-bold hover:underline">Create account</a>
+                </p>
+            </div>
         </div>
-
-        <!-- Register Form -->
-        <div id="register-form" class="auth-form">
-            <h2>Register {% if role %}as {{ 'Customer' if role == 'customer' else 'Store Owner' }}{% endif %}</h2>
-            <form onsubmit="handleRegister(event)">
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="register-email" required>
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="register-password" required>
-                </div>
-
-                {% if role %}
-                <input type="hidden" id="register-role" value="{{ role }}">
-                {% else %}
-                <div class="form-group">
-                    <label>I am a:</label>
-                    <select id="register-role" required>
-                        <option value="">Select Role</option>
-                        <option value="customer">Customer</option>
-                        <option value="store_owner">Store Owner</option>
-                    </select>
-                </div>
-                {% endif %}
-
-                <button type="submit" class="btn-primary">Register</button>
-            </form>
-        </div>
-
-        <div id="message" class="message"></div>
     </div>
-</div>
-{% endblock %}
 
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
-{% endblock %}
+    <!-- Hero Side (hidden on mobile) -->
+    <div class="hidden lg:flex lg:w-1/2 hero-bg relative">
+        <div class="absolute inset-0 bg-black/40"></div>
+        <div class="relative z-10 flex flex-col justify-end p-12">
+            <div class="bg-white/15 backdrop-blur-md p-8 rounded-2xl border border-white/20">
+                <h3 class="text-2xl font-bold text-white mb-2">Authentic & Direct</h3>
+                <p class="text-white/80 text-sm leading-relaxed">Connecting local Indian villages and artisans directly to your neighborhood mart. Experience true authenticity.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const p = document.getElementById('password');
+            const icon = this.querySelector('span');
+            p.type = p.type === 'password' ? 'text' : 'password';
+            icon.textContent = p.type === 'password' ? 'visibility' : 'visibility_off';
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('submitBtn');
+            const msg = document.getElementById('message');
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-base">progress_activity</span><span>Signing in...</span>';
+            btn.disabled = true;
+            msg.className = 'hidden';
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    msg.textContent = 'Login successful! Redirecting...';
+                    msg.className = 'mb-4 p-3 rounded-xl text-sm text-center font-semibold bg-green-100 text-green-700 block';
+                    setTimeout(() => window.location.href = data.redirect, 800);
+                } else {
+                    msg.textContent = data.error || 'Invalid credentials';
+                    msg.className = 'mb-4 p-3 rounded-xl text-sm text-center font-semibold bg-red-100 text-red-700 block';
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>Sign In</span><span class="material-symbols-outlined text-base">login</span>';
+                }
+            } catch (err) {
+                msg.textContent = 'Network error. Please try again.';
+                msg.className = 'mb-4 p-3 rounded-xl text-sm text-center font-semibold bg-red-100 text-red-700 block';
+                btn.disabled = false;
+                btn.innerHTML = '<span>Sign In</span><span class="material-symbols-outlined text-base">login</span>';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Sign Up | Smart Retail Shopping</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { primary: '#2e7d32', secondary: '#ef6c00', surface: '#fbfaf8' },
+                    fontFamily: { sans: ['Poppins', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .hero-bg { background-image: url('https://images.unsplash.com/photo-1596484552834-6a58f850e0a1?q=80&w=1887&auto=format&fit=crop'); background-size: cover; background-position: center; }
+    </style>
+</head>
+<body class="bg-surface font-sans min-h-screen flex flex-col lg:flex-row">
+
+    <!-- Form Side -->
+    <div class="w-full lg:w-1/2 flex flex-col justify-center px-6 sm:px-10 lg:px-16 py-12 min-h-screen overflow-y-auto">
+        <div class="max-w-md w-full mx-auto">
+
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-11 h-11 rounded-full bg-primary flex items-center justify-center text-white shadow-lg flex-shrink-0">
+                    <span class="material-symbols-outlined text-xl">storefront</span>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-primary leading-tight">Smart Retail Shopping</h1>
+                    <p class="text-xs text-gray-400">Authentic • Local • Direct</p>
+                </div>
+            </div>
+
+            <h2 class="text-2xl sm:text-3xl font-bold mb-1 text-gray-900">Create Account</h2>
+            <p class="text-gray-500 mb-6 text-sm">Join our community — shop or sell village products.</p>
+
+            <div id="message" class="hidden mb-4 p-3 rounded-xl text-sm text-center font-semibold"></div>
+
+            <form id="registerForm" class="space-y-4">
+                <!-- Role -->
+                <div>
+                    <label class="block text-sm font-semibold mb-2 text-gray-700">I want to...</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="role" value="customer" class="peer sr-only" checked/>
+                            <div class="p-3.5 border-2 border-gray-200 rounded-xl peer-checked:border-primary peer-checked:bg-green-50 transition-all text-center flex flex-col items-center gap-1.5">
+                                <span class="material-symbols-outlined text-2xl text-primary">shopping_basket</span>
+                                <span class="font-bold text-xs text-gray-700 peer-checked:text-primary">Shop / Buy</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="role" value="store_owner" class="peer sr-only"/>
+                            <div class="p-3.5 border-2 border-gray-200 rounded-xl peer-checked:border-secondary peer-checked:bg-orange-50 transition-all text-center flex flex-col items-center gap-1.5">
+                                <span class="material-symbols-outlined text-2xl text-secondary">store</span>
+                                <span class="font-bold text-xs text-gray-700">Sell / Mart Owner</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold mb-1.5 text-gray-700">Email Address</label>
+                    <div class="relative">
+                        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 material-symbols-outlined text-xl">mail</span>
+                        <input type="email" id="email" required placeholder="you@example.com"
+                            class="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"/>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold mb-1.5 text-gray-700">Create Password</label>
+                    <div class="relative">
+                        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 material-symbols-outlined text-xl">lock</span>
+                        <input type="password" id="password" required placeholder="••••••••"
+                            class="w-full pl-11 pr-12 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"/>
+                        <button type="button" id="togglePassword" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary">
+                            <span class="material-symbols-outlined text-xl">visibility</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold mb-1.5 text-gray-700">Confirm Password</label>
+                    <div class="relative">
+                        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 material-symbols-outlined text-xl">lock_check</span>
+                        <input type="password" id="confirmPassword" required placeholder="••••••••"
+                            class="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm"/>
+                    </div>
+                </div>
+
+                <button type="submit" id="submitBtn"
+                    class="w-full py-3.5 bg-primary hover:bg-green-800 text-white font-bold rounded-xl shadow-lg transition-all flex justify-center items-center gap-2 text-sm">
+                    <span>Create Account</span>
+                    <span class="material-symbols-outlined text-base">arrow_forward</span>
+                </button>
+            </form>
+
+            <div class="mt-6 text-center pb-8">
+                <p class="text-gray-500 text-sm">Already have an account?
+                    <a href="{{ url_for('login') }}" class="text-primary font-bold hover:underline">Sign In</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Side (hidden on mobile) -->
+    <div class="hidden lg:flex lg:w-1/2 hero-bg relative">
+        <div class="absolute inset-0 bg-black/40"></div>
+        <div class="relative z-10 flex flex-col justify-end p-12">
+            <div class="bg-white/15 backdrop-blur-md p-8 rounded-2xl border border-white/20">
+                <h3 class="text-2xl font-bold text-white mb-2">Support Local Communities</h3>
+                <p class="text-white/80 text-sm leading-relaxed">Every purchase helps scale small businesses, craftsmen, and farmers from Indian villages into modern marts.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const p = document.getElementById('password');
+            const icon = this.querySelector('span');
+            p.type = p.type === 'password' ? 'text' : 'password';
+            icon.textContent = p.type === 'password' ? 'visibility' : 'visibility_off';
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const role = document.querySelector('input[name="role"]:checked').value;
+            const btn = document.getElementById('submitBtn');
+            const msg = document.getElementById('message');
+
+            if (password !== confirmPassword) {
+                msg.textContent = 'Passwords do not match!';
+                msg.className = 'mb-4 p-3 rounded-xl text-sm text-center font-semibold bg-red-100 text-red-700 block';
+                return;
+            }
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-base">progress_activity</span><span>Creating...</span>';
+            btn.disabled = true;
+            msg.className = 'hidden';
+            try {
+                const res = await fetch('/api/register', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, role })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    msg.textContent = 'Account created! Redirecting...';
+                    msg.className = 'mb-4 p-3 rounded-xl text-sm text-center font-semibold bg-green-100 text-green-700 block';
+                    setTimeout(() => window.location.href = data.role === 'customer' ? '/customer/dashboard' : '/store/dashboard', 1000);
+                } else {
+                    msg.textContent = data.error || 'Registration failed';
+                    msg.className = 'mb-4 p-3 rounded-xl text-sm text-center font-semibold bg-red-100 text-red-700 block';
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>Create Account</span><span class="material-symbols-outlined text-base">arrow_forward</span>';
+                }
+            } catch (err) {
+                msg.textContent = 'Network error.';
+                msg.className = 'mb-4 p-3 rounded-xl text-sm text-center font-semibold bg-red-100 text-red-700 block';
+                btn.disabled = false;
+                btn.innerHTML = '<span>Create Account</span><span class="material-symbols-outlined text-base">arrow_forward</span>';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -45,19 +45,23 @@ def role_required(role):
 
 @app.route('/')
 def index():
-    """Home page - Landing page"""
+    """Home page - Routes to login or dashboard"""
     if 'user_id' in session:
         if session.get('role') == 'customer':
             return redirect(url_for('customer_dashboard'))
         elif session.get('role') == 'store_owner':
             return redirect(url_for('store_dashboard'))
-    return render_template('landing.html')
+    return redirect(url_for('login'))
 
 @app.route('/login')
 def login():
-    """Login and registration page"""
-    role = request.args.get('role')
-    return render_template('login.html', role=role)
+    """Login page"""
+    return render_template('login.html')
+
+@app.route('/register')
+def register_page():
+    """Registration page"""
+    return render_template('register.html')
 
 @app.route('/logout')
 def logout():
@@ -213,6 +217,8 @@ def my_orders_api():
     """Get orders for current user"""
     user_id = session['user_id']
     orders = firebase.get_user_orders(user_id)
+    if isinstance(orders, dict) and 'error' in orders:
+        orders = {}
     return jsonify(orders)
 
 # ========== STORE OWNER ROUTES ==========
@@ -268,6 +274,9 @@ def stores_api():
         
         firebase.create_store(store_id, store_data)
         
+        # Cache store_id in session for fast lookup
+        session['store_id'] = store_id
+        
         return jsonify({
             'success': True,
             'store_id': store_id,
@@ -286,29 +295,76 @@ def get_store_api(store_id):
 @role_required('store_owner')
 def get_my_store_api():
     """Get the store owned by the current user"""
-    stores = firebase.get_all_stores()
     user_id = session['user_id']
     
-    if not stores:
+    # Fast path: use session-cached store_id
+    cached_store_id = session.get('store_id')
+    if cached_store_id:
+        store_data = firebase.get_store(cached_store_id)
+        if isinstance(store_data, dict) and store_data.get('owner_id') == user_id:
+            store_data['id'] = cached_store_id
+            return jsonify(store_data)
+    
+    # Fallback: scan all stores
+    stores = firebase.get_all_stores()
+    if not stores or not isinstance(stores, dict):
         return jsonify(None)
         
-    # Find store owned by user
     for store_id, store_data in stores.items():
+        if not isinstance(store_data, dict):
+            continue
         if store_data.get('owner_id') == user_id:
-            # Inject ID into data
             store_data['id'] = store_id
+            session['store_id'] = store_id  # cache it
             return jsonify(store_data)
             
     return jsonify(None)
 
 # Product APIs
-@app.route('/api/stores/<store_id>/products', methods=['GET'])
+@app.route('/api/stores/<store_id>/products', methods=['GET', 'POST'])
 @login_required
 def products_api(store_id):
-    """Get all products for a store"""
+    """Get all products for a store or add a new one"""
     if request.method == 'GET':
         products = firebase.get_products(store_id)
         return jsonify(products)
+
+    elif request.method == 'POST':
+        data = request.json
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+
+        name = data.get('name', '').strip()
+        price = data.get('price')
+        if not name or price is None:
+            return jsonify({'error': 'Product name and price are required'}), 400
+
+        # Generate unique product ID
+        product_id = str(uuid.uuid4())
+
+        product_data = {
+            'name': name,
+            'price': float(price),
+            'stock': int(data.get('stock', 0)),
+            'category': data.get('category', 'General'),
+            'size': data.get('size', ''),
+            'description': data.get('description', ''),
+            'image': data.get('image', ''),
+            'store_id': store_id,
+            'created_at': datetime.now().isoformat(),
+            'scan_count': 0
+        }
+
+        # Save product to Firebase
+        firebase.add_product(store_id, product_id, product_data)
+
+        return jsonify({
+            'success': True,
+            'product_id': product_id,
+            'product_name': name,
+            'store_id': store_id,
+            'qr_url': f'/api/qr-code/{product_id}'
+        })
 
 @app.route('/api/stores/<store_id>/products/<product_id>', methods=['GET', 'PUT', 'DELETE'])
 @login_required
@@ -358,6 +414,32 @@ def get_global_product(product_id):
         
     return jsonify(product)
 
+@app.route('/api/qr-code/<product_id>', methods=['GET'])
+def get_id_qr_code(product_id):
+    """Generate a QR code image in-memory for a given product_id and stream it back"""
+    try:
+        import qrcode
+        import io
+        
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(product_id)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="black", back_color="white")
+        
+        buf = io.BytesIO()
+        img.save(buf, format='PNG')
+        buf.seek(0)
+        
+        return send_file(buf, mimetype='image/png', as_attachment=False)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 # Cart APIs
 @app.route('/api/cart', methods=['GET', 'POST', 'DELETE'])
 @login_required
@@ -368,18 +450,34 @@ def cart_api():
     
     if request.method == 'GET':
         cart = firebase.get_cart(user_id)
+        # Firebase may return {"error": "Permission denied"} if rules are restrictive
+        if isinstance(cart, dict) and 'error' in cart:
+            cart = {}
         return jsonify(cart)
     
     elif request.method == 'POST':
         data = request.json
         product_id = data.get('product_id')
+        store_id = data.get('store_id')
+        
+        # If product name or price is missing, fetch them from Firebase
+        product_name = data.get('product_name')
+        price = data.get('price')
+        image = data.get('image')
+        
+        if (not product_name or price is None) and store_id:
+            product = firebase.get_product(store_id, product_id)
+            if product and 'error' not in product:
+                product_name = product.get('name', 'Product')
+                price = product.get('price', 0)
+                image = product.get('image', '')
         
         cart_item = {
-            'store_id': data.get('store_id'),
-            'product_name': data.get('product_name'),
-            'price': data.get('price'),
+            'store_id': store_id,
+            'product_name': product_name,
+            'price': price,
             'quantity': data.get('quantity', 1),
-            'image': data.get('image', ''),
+            'image': image or '',
             'added_at': datetime.now().isoformat()
         }
         
@@ -398,6 +496,28 @@ def remove_from_cart_api(product_id):
     user_id = session['user_id']
     firebase.remove_from_cart(user_id, product_id)
     return jsonify({'success': True})
+
+# Product Request APIs
+@app.route('/api/stores/<store_id>/requests', methods=['GET', 'POST'])
+@login_required
+def store_requests_api(store_id):
+    """Get or add product requests for a store"""
+    if request.method == 'GET':
+        # Only owners can see requests
+        if session.get('role') != 'store_owner':
+            return jsonify({'error': 'Unauthorized'}), 403
+        requests_data = firebase.get_store_requests(store_id)
+        return jsonify(requests_data)
+    
+    elif request.method == 'POST':
+        # Customers can add requests
+        data = request.json
+        product_name = data.get('product_name')
+        if not product_name:
+            return jsonify({'error': 'Product name required'}), 400
+        
+        firebase.add_product_request(store_id, product_name)
+        return jsonify({'success': True})
 
 # Order APIs
 @app.route('/api/orders', methods=['POST'])
@@ -496,6 +616,8 @@ def history_api():
     """Get scanned history"""
     user_id = session['user_id']
     history = firebase.get_history(user_id)
+    if isinstance(history, dict) and 'error' in history:
+        history = {}
     return jsonify(history)
 
 # Product Request APIs
@@ -534,14 +656,14 @@ def analytics_api(store_id):
 
 if __name__ == '__main__':
     print("\n" + "="*60)
-    print("🚀 Smart QR Shopping Website - Flask Server")
-    print("="*60)
-    print(f"\n✅ Server running at: http://{config.HOST}:{config.PORT}")
-    print(f"\n📝 Instructions:")
+    print("[+] Smart QR Shopping Website - Flask Server")
+    print("============================================================")
+    print(f"Starting server on http://{config.HOST}:{config.PORT}")
+    print(f"\n[i] Instructions:")
     print(f"   1. Open your browser")
     print(f"   2. Navigate to: http://{config.HOST}:{config.PORT}")
     print(f"   3. Register as Customer or Store Owner")
-    print(f"\n⚠️  IMPORTANT: Update Firebase credentials in config.py")
+    print(f"\n[!] IMPORTANT: Update Firebase credentials in config.py")
     print("="*60 + "\n")
     
     app.run(

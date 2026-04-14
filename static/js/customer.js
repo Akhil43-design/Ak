@@ -28,7 +28,7 @@ function renderStores(stores) {
 
     if (!stores || Object.keys(stores).length === 0) {
         list.innerHTML = `
-            <div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.4); grid-column: 1/-1;">
+            <div style="text-align: center; padding: 40px; color: rgba(0,0,0,0.4); grid-column: 1/-1;">
                 <p>No stores with active products found nearby.</p>
             </div>`;
         return;
@@ -36,42 +36,26 @@ function renderStores(stores) {
 
     Object.entries(stores).forEach(([id, store]) => {
         const card = document.createElement('div');
-        card.className = 'store-card';
-        card.style.background = 'rgba(255, 255, 255, 0.05)';
-        card.style.border = '1px solid rgba(255, 255, 255, 0.1)';
-        card.style.borderRadius = '20px';
-        card.style.padding = '1.5rem';
-        card.style.cursor = 'pointer';
-        card.style.transition = 'all 0.3s ease';
-        card.style.display = 'flex';
-        card.style.alignItems = 'center';
-        card.style.gap = '1.2rem';
-        card.style.backdropFilter = 'blur(10px)';
-
-        card.onmouseover = () => {
-            card.style.background = 'rgba(255, 255, 255, 0.1)';
-            card.style.transform = 'translateY(-5px)';
-            card.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-        };
-        card.onmouseout = () => {
-            card.style.background = 'rgba(255, 255, 255, 0.05)';
-            card.style.transform = 'translateY(0)';
-            card.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-        };
-
+        card.className = 'group relative bg-surface-container-lowest rounded-[2.5rem] overflow-hidden ethereal-shadow ethereal-shadow-hover transition-all duration-300 cursor-pointer';
         card.onclick = () => window.location.href = `/store/${id}`;
 
+        const firstLetter = store.name ? store.name.charAt(0).toUpperCase() : 'S';
+        const storeImageUrl = 'https://lh3.googleusercontent.com/aida-public/AB6AXuBh2qcWDieHtFTcaCX9BaROMMfeKS7lkvc3MtUlhCDusVGt4qHc30kteZSD5sVDGBLzX8XsnsBjBsK8w_3UhHG8o4shJMFxLmFVAt1y8mchb1Yv627sJl2FNmI6g8cFazy2ZgtZtNwxnbGnjKWckqRynmXnQTcOvtvbJbYvBAKzfZ46ezC7KRcs7hXYKJCkgDAZadcS94Xnja9Az4VUMt_Vc9Hwi6l6PuV0S7OU-pOJWR9PB2slDN4DPnr2l_1RbGHSU8mUsVRyzYaJ';
+        
         card.innerHTML = `
-            <div class="store-icon" style="font-size: 2.5rem; background: rgba(99, 102, 241, 0.1); width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; border-radius: 15px;">🏪</div>
-            <div class="store-info" style="flex: 1;">
-                <h3 style="margin: 0 0 5px 0; font-size: 1.25rem; font-weight: 600; color: #fff;">${store.name}</h3>
-                <p style="margin: 0; opacity: 0.6; font-size: 0.9rem;">${store.description || 'Premium Partner Store'}</p>
-                <div style="margin-top: 10px; display: flex; align-items: center; gap: 5px;">
-                    <span style="display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></span>
-                    <span style="font-size: 0.75rem; color: #10b981; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Active Inventory</span>
+            <div class="h-32 w-full overflow-hidden">
+                <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src="${storeImageUrl}"/>
+            </div>
+            <div class="p-6 pt-0 mt-[-24px] relative">
+                <div class="w-16 h-16 rounded-2xl bg-white p-1 ethereal-shadow mb-3 flex items-center justify-center text-primary font-bold text-2xl">
+                    ${firstLetter}
+                </div>
+                <h4 class="text-lg font-bold">${store.name}</h4>
+                <p class="text-sm text-on-surface-variant mb-4">${store.description || 'Premium Partner Store'}</p>
+                <div class="flex gap-2">
+                    <span class="px-3 py-1 bg-surface-container-low text-[10px] font-bold uppercase tracking-wider text-on-surface-variant rounded-full">Active Offers</span>
                 </div>
             </div>
-            <div style="color: rgba(255,255,255,0.3); font-size: 1.2rem;">➜</div>
         `;
         list.appendChild(card);
     });
@@ -81,34 +65,48 @@ function renderStores(stores) {
 async function loadHistory() {
     try {
         const res = await fetch('/api/my-orders');
-        const orders = await res.json();
+        const raw = await res.json();
         const container = document.getElementById('history-container');
         if (!container) return;
 
+        // Firebase returns an object keyed by IDs; normalize to array
+        let orders = [];
+        if (Array.isArray(raw)) {
+            orders = raw;
+        } else if (raw && typeof raw === 'object' && !raw.error) {
+            orders = Object.entries(raw).map(([id, val]) => ({ id, ...val }));
+        }
+
         container.innerHTML = '';
+        if (orders.length === 0) {
+            container.innerHTML = '<p class="text-gray-400 text-sm italic">No recent orders yet.</p>';
+            return;
+        }
         orders.forEach(order => {
             container.appendChild(createOrderCard(order));
         });
     } catch (e) {
-        console.error(e);
+        console.error('loadHistory error:', e);
     }
 }
 
 function createOrderCard(order) {
     const card = document.createElement('div');
-    card.className = 'history-card'; // Assumed class
-    const date = new Date(order.timestamp).toLocaleDateString();
+    card.className = 'border border-gray-100 rounded-xl p-4 bg-white shadow-sm';
+    const orderId = order.id || order.order_id || 'N/A';
+    const shortId = typeof orderId === 'string' ? orderId.substring(0, 8) : orderId;
+    const date = order.timestamp ? new Date(order.timestamp).toLocaleDateString('en-IN') : 'Unknown';
+    const total = order.total != null ? parseFloat(order.total).toFixed(2) : '0.00';
 
     card.innerHTML = `
-        <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h3>Order #${order.id.substring(0, 8)}</h3>
-            <span class="badge badge-success" style="background: #27ae60; color: white; padding: 5px 10px; border-radius: 15px;">Confirmed</span>
+        <div class="flex justify-between items-start mb-1">
+            <span class="font-bold text-sm text-gray-800">#ORD-${shortId}</span>
+            <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">Confirmed</span>
         </div>
-        <div style="width: 100%; display: flex; justify-content: space-between; margin-bottom: 10px;">
-            <span><strong>Date:</strong> ${date}</span>
-            <span><strong>Total:</strong> $${parseFloat(order.total).toFixed(2)}</span>
-        </div>
-        <button class="btn-primary" onclick="window.location.href='/receipt/${order.id}'">View Receipt</button>
+        <p class="text-sm text-gray-500 mb-3">₹${total} &bull; ${date}</p>
+        <button class="text-primary text-xs font-bold hover:underline flex items-center gap-1" onclick="window.location.href='/receipt/${orderId}'">
+            View Receipt
+        </button>
     `;
     return card;
 }

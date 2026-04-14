@@ -1,116 +1,348 @@
-{% extends "base.html" %}
+<!-- Ethereal - Multi-Store Home -->
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Sky Commerce | The Multi-Store Hub</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#0ea5e9",
+                        "on-primary": "#ffffff",
+                        "background": "#f8fafc",
+                        "surface": "#ffffff",
+                        "on-surface": "#0f172a",
+                        "outline": "#94a3b8"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.75rem",
+                        "xl": "1rem",
+                        "2xl": "1.5rem",
+                        "3xl": "2rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Poppins"],
+                        "body": ["Poppins"],
+                        "label": ["Inter"]
+                    },
+                    "boxShadow": {
+                        "3d": "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), inset 0 -2px 4px rgba(0,0,0,0.1)",
+                        "3d-hover": "0 30px 45px -12px rgba(14, 165, 233, 0.25), 0 15px 15px -8px rgba(0, 0, 0, 0.08), inset 0 -4px 6px rgba(0,0,0,0.1)"
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-nav { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.3); }
+        .glass-card { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.4); }
+        .sky-gradient { background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%); }
+        .card-lift { transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .card-lift:hover { transform: translateY(-12px) scale(1.02); }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body">
 
-{% block title %}Welcome - Smart QR Shopping{% endblock %}
-
-{% block content %}
-<div class="landing-container">
-    <div class="hero-section">
-        <h1>Welcome to Smart QR Shopping</h1>
-        <p>The modern way to shop and manage your store</p>
-    </div>
-
-    <div class="role-selection">
-        <div class="role-card customer-card">
-            <div class="card-icon">🛍️</div>
-            <h2>For Customers</h2>
-            <p>Browse stores, scan QR codes, and shop with ease.</p>
-            <a href="{{ url_for('login', role='customer') }}" class="btn-primary">Customer Login</a>
+<header class="w-full sticky top-0 z-50 glass-nav">
+    <div class="max-w-7xl mx-auto px-6 py-4">
+        <div class="flex items-center justify-between gap-8">
+            <a class="text-2xl font-800 tracking-tight text-primary flex items-center gap-2" href="{{ url_for('index') }}" style="text-decoration:none;">
+                <span class="material-symbols-outlined text-3xl">hub</span>
+                <span>SkyCommerce</span>
+            </a>
+            
+            <div class="flex-1 max-w-xl relative">
+                <input class="w-full bg-slate-100/50 border-none rounded-2xl px-12 py-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all duration-300" placeholder="Search stores, brands, products..." type="text"/>
+                <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
+            </div>
+            
+            <div class="flex items-center gap-6">
+                <nav class="hidden lg:flex items-center gap-6 font-semibold text-sm">
+                    <a class="text-primary" href="#" style="text-decoration:none;">Home</a>
+                    <a class="text-slate-500 hover:text-primary transition-colors" href="#" style="text-decoration:none;">Stores</a>
+                    <a class="text-slate-500 hover:text-primary transition-colors" href="#" style="text-decoration:none;">Categories</a>
+                </nav>
+                <div class="flex items-center gap-3">
+                    <a href="{{ url_for('cart') }}" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 hover:bg-primary hover:text-white transition-all shadow-sm relative" style="text-decoration:none;">
+                        <span class="material-symbols-outlined">shopping_bag</span>
+                    </a>
+                    {% if session.user_id %}
+                        <a href="{{ url_for('customer_dashboard') if session.get('role') == 'customer' else url_for('store_dashboard') }}" class="px-6 py-2.5 rounded-xl sky-gradient text-white text-sm font-bold shadow-3xl hover:shadow-primary/30 transition-all" style="text-decoration:none;">Dashboard</a>
+                        <a href="{{ url_for('logout') }}" class="px-6 py-2.5 rounded-xl bg-slate-100 text-slate-600 text-sm font-bold shadow-sm hover:bg-slate-200 transition-all" style="text-decoration:none;">Logout</a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="px-6 py-2.5 rounded-xl sky-gradient text-white text-sm font-bold shadow-3xl hover:shadow-primary/30 transition-all" style="text-decoration:none;">Login</a>
+                    {% endif %}
+                </div>
+            </div>
         </div>
+    </div>
+</header>
 
-        <div class="role-card store-card">
-            <div class="card-icon">🏪</div>
-            <h2>For Store Owners</h2>
-            <p>Manage your products, track orders, and grow your business.</p>
-            <a href="{{ url_for('login', role='store_owner') }}" class="btn-secondary">Store Owner Login</a>
+<main class="w-full">
+    <!-- Hero Section -->
+    <section class="max-w-7xl mx-auto px-6 py-8">
+        <div class="relative h-[550px] rounded-3xl overflow-hidden shadow-3d group">
+            <img alt="high-end minimalist workspace" class="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-1000" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6uUhzRS1Bgh7EO4H1y2_24Zl2MB6NLIW_2wz0q5ysfjI9UpSaOw9Tk2_cxCzR4u6dHhBGiaWkZc3xi40BY-6NDA5QIc4paMCN5Zc-lefXD3LL6DSUZNFrMencF-EiF8d2ko9dhW6lwZnjI79NNkH_r6PZVXrQARqmG6IlpK-zjlSi6JPVE-e16mUbKHVpwzo6xE71f4T4qPXPDjgxPxvsaFUItewtVUt9n9F398DYDu_JbR_hpyHbfa-TbXyT6kQ45v3l2KFRW7wm"/>
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent md:bg-gradient-to-r md:from-slate-900/90 md:to-transparent flex flex-col justify-end md:justify-center p-8 md:px-16 pb-16">
+                <div class="glass-card w-fit px-4 py-1 rounded-full text-white text-xs font-bold tracking-widest mb-6">SEASONAL EXCLUSIVE</div>
+                <h1 class="text-white text-5xl md:text-7xl font-bold tracking-tight max-w-2xl leading-tight mb-6">
+                    Global Brands, <br/><span class="text-primary">One Platform.</span>
+                </h1>
+                <p class="text-slate-300 text-lg max-w-md mb-10 leading-relaxed font-light">
+                    Discover thousands of verified stores. From boutique fashion to next-gen tech, all in your curated sky hub.
+                </p>
+                <div class="flex flex-wrap gap-4">
+                    <button onclick="document.querySelector('section:nth-of-type(2)').scrollIntoView({behavior:'smooth'})" class="px-10 py-4 rounded-2xl sky-gradient text-white font-bold text-lg shadow-3d hover:shadow-3d-hover transition-all">Start Shopping</button>
+                    <button onclick="window.location.href='/customer/dashboard'" class="px-10 py-4 rounded-2xl glass-card text-white font-bold text-lg hover:bg-white/20 transition-all">Explore Stores</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Stores Section -->
+    <section class="max-w-7xl mx-auto px-6 py-16">
+        <div class="flex justify-between items-end mb-10">
+            <div>
+                <h2 class="text-3xl font-bold tracking-tight text-on-surface">Featured Stores</h2>
+                <p class="text-outline mt-2">The highest-rated shops in the atmosphere right now.</p>
+            </div>
+            <button onclick="window.location.href='/customer/dashboard'" class="text-primary font-bold flex items-center gap-2 group"> All Stores <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_right_alt</span>
+            </button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="card-lift group cursor-pointer bg-white rounded-3xl p-4 shadow-3d hover:shadow-3d-hover">
+                <div class="relative h-48 w-full rounded-2xl overflow-hidden mb-5">
+                    <img alt="Nova Tech" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6uUhzRS1Bgh7EO4H1y2_24Zl2MB6NLIW_2wz0q5ysfjI9UpSaOw9Tk2_cxCzR4u6dHhBGiaWkZc3xi40BY-6NDA5QIc4paMCN5Zc-lefXD3LL6DSUZNFrMencF-EiF8d2ko9dhW6lwZnjI79NNkH_r6PZVXrQARqmG6IlpK-zjlSi6JPVE-e16mUbKHVpwzo6xE71f4T4qPXPDjgxPxvsaFUItewtVUt9n9F398DYDu_JbR_hpyHbfa-TbXyT6kQ45v3l2KFRW7wm"/>
+                    <div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </div>
+                <div class="flex items-center gap-3 mb-4 px-1">
+                    <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold">NT</div>
+                    <div>
+                        <h3 class="font-bold text-on-surface">Nova Tech</h3>
+                        <p class="text-xs text-outline">Electronics • 4.9 ★</p>
+                    </div>
+                </div>
+                <button class="w-full py-3 rounded-xl bg-slate-50 text-primary font-bold text-sm hover:sky-gradient hover:text-white transition-all">Open Store</button>
+            </div>
+            <div class="card-lift group cursor-pointer bg-white rounded-3xl p-4 shadow-3d hover:shadow-3d-hover">
+                <div class="relative h-48 w-full rounded-2xl overflow-hidden mb-5">
+                    <img alt="Aurora Fashion" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCwrt9VQ6mz6KB3vXjXkJx5oJ4fuTBv54bdJaofMcLEvk6G6VvXMltxRdQiAPQTswRsaz2k882t_aLH1dkpbBYJPG7GtBZTfU7iExDMqnaqqddv2ZRC-KV-L_b9kiUTITHGv9L9rtiGHY8Hl0ZCwwyBlVGuHO_HxeDiR0zcJ0aKGgHVzcmcx1_qxtaM--RtiTnH9P3dDZkVcIn7WqrB6A-LdEpnTGRxotmfPn0DSB3bvA0ekKYQ0urE6IJBjOXma1ijqhBbNqi2Z8U"/>
+                </div>
+                <div class="flex items-center gap-3 mb-4 px-1">
+                    <div class="w-10 h-10 rounded-xl bg-pink-100 flex items-center justify-center text-pink-500 font-bold">AF</div>
+                    <div>
+                        <h3 class="font-bold text-on-surface">Aurora Fashion</h3>
+                        <p class="text-xs text-outline">Apparel • 4.8 ★</p>
+                    </div>
+                </div>
+                <button class="w-full py-3 rounded-xl bg-slate-50 text-primary font-bold text-sm hover:sky-gradient hover:text-white transition-all">Open Store</button>
+            </div>
+            <div class="card-lift group cursor-pointer bg-white rounded-3xl p-4 shadow-3d hover:shadow-3d-hover">
+                <div class="relative h-48 w-full rounded-2xl overflow-hidden mb-5">
+                    <img alt="Zenith Living" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBi0YHpzEOv34LHvb0wDy70BacaImuMHQBP-7WVJR94FbCQOiviAPJ1YXwK1kqWFoJeWflf375abPf4wDMkmmJa5KXhMYXKWaESSKuX9zSbdCz2wHiWOUvS87eQd5SX4APhRA0_zwwRG05fD8JY15TLJY3PTvFBwVYLVQZeLNdTCHLVkH1ixOvGk9nxGBhTqPhgR1ILUzLzyLC9xxYdbY_7BEQR8VwNFgy0PMRz3D-K_lHOB75Cv_2_saa01zEaXC46I44uHCS-Jjoa"/>
+                </div>
+                <div class="flex items-center gap-3 mb-4 px-1">
+                    <div class="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center text-orange-500 font-bold">ZL</div>
+                    <div>
+                        <h3 class="font-bold text-on-surface">Zenith Living</h3>
+                        <p class="text-xs text-outline">Furniture • 5.0 ★</p>
+                    </div>
+                </div>
+                <button class="w-full py-3 rounded-xl bg-slate-50 text-primary font-bold text-sm hover:sky-gradient hover:text-white transition-all">Open Store</button>
+            </div>
+            <div class="card-lift group cursor-pointer bg-white rounded-3xl p-4 shadow-3d hover:shadow-3d-hover">
+                <div class="relative h-48 w-full rounded-2xl overflow-hidden mb-5">
+                    <img alt="Velocity Gear" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBy7eMz651z5AxTKaNSldtvlEOVGymzMivZjS9faNSe_bC1efLbDqwZe8NmbuC0o1Z_SmFV7h_JUfgnOIh4iAsDKFAsEn-EN7uN9y5ah2Btcx14Fd8DF0PX7eFxiRsRSp8MlKroOZ-f6tdJ3ZZ8lM0aZk_PsOppSkBeElrSxOHnAc3iQBXX2AXg7CVLtX8g8wKbuAsSqhnebecqL_VVEg30vTD8f9M8fK9Qz2lM2P3xcxR_T4PdV4q4Go_sIoS62Bg5wXOBp9l7XfL_"/>
+                </div>
+                <div class="flex items-center gap-3 mb-4 px-1">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-500 font-bold">VG</div>
+                    <div>
+                        <h3 class="font-bold text-on-surface">Velocity Gear</h3>
+                        <p class="text-xs text-outline">Sports • 4.7 ★</p>
+                    </div>
+                </div>
+                <button class="w-full py-3 rounded-xl bg-slate-50 text-primary font-bold text-sm hover:sky-gradient hover:text-white transition-all">Open Store</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Top Deals Section -->
+    <section class="w-full bg-slate-100 py-20">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex justify-between items-center mb-12">
+                <div>
+                    <h2 class="text-4xl font-extrabold tracking-tight text-on-surface">Top Atmosphere Deals</h2>
+                    <p class="text-outline text-lg">Direct price drops from our featured merchants.</p>
+                </div>
+                <button onclick="window.location.href='/customer/dashboard'" class="px-6 py-2 rounded-full border border-primary text-primary font-bold hover:bg-primary hover:text-white transition-all"> View All
+                </button>
+            </div>
+            
+            <!-- Using INR (₹) as requested -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="card-lift group bg-white rounded-3xl p-4 shadow-3d hover:shadow-3d-hover">
+                    <div class="relative h-64 w-full rounded-2xl overflow-hidden bg-slate-50 mb-6">
+                        <img alt="SonicFlow Pro X" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnmBcx6T2y-AQIinVx0s6WdYO_YGJmZ9_s97fGPEMSGCefb4Dio2DSQODkKdgk9Th2hkj_0KRg9F9jU7kcqZnyANK9FEM3DLpLxzlmmYwX-Kbhus0Tpq115MutwePMJraksqeNTUtn8eeGQOrYgHibbVPL-YdatfA-AhZ0eA9PpVZEQwR0evF2z61KJTDQ6e-B0lnaReju-KaZMGHHeS3dEK9nqz4XOIh3Pgirg78rc1uCOQqfFcL_4VP06U3Au8bd3NrYr19jaX1v"/>
+                        <span class="absolute top-4 left-4 bg-red-500 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter">30% OFF</span>
+                    </div>
+                    <div class="px-2">
+                        <p class="text-primary text-[10px] font-black uppercase tracking-widest mb-1">Nova Tech</p>
+                        <h3 class="font-bold text-on-surface text-lg mb-2">SonicFlow Pro X</h3>
+                        <div class="flex items-center gap-2 mb-6">
+                            <span class="text-2xl font-black text-on-surface">₹20,500</span>
+                            <span class="text-sm text-outline line-through">₹29,000</span>
+                        </div>
+                        <button class="w-full py-3.5 rounded-2xl bg-slate-900 text-white font-bold text-sm hover:sky-gradient transition-all flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-sm">add_shopping_cart</span> Add to Cart
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card-lift group bg-white rounded-3xl p-4 shadow-3d hover:shadow-3d-hover">
+                    <div class="relative h-64 w-full rounded-2xl overflow-hidden bg-slate-50 mb-6">
+                        <img alt="Horizon Chrono V2" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwRMVpVGr5_kdNLz7qnximybmGHBFJFOnoiUAMP5OqIjvIYachwuDNxE7mgB_oGIMwaqsynWglMfTfMhmqdQAYjZ9qkNVtknlXQ_6e9diVx6_eFMjrpJEBd7qmabUlUS_4nJrk1Tls-Kzb21NYiat-kX8oNA-K8maujoWhkjdMsn3P7-Wrmn_F7OLD73Oo9ftGbhE4B1pDdQ-UZRlF9GezCCmNQToH5Sm5dG88ncANPnXBiEItHFNv-zdDJVKlg14-u4Xvim30g12q"/>
+                        <span class="absolute top-4 left-4 bg-primary text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter">New Entry</span>
+                    </div>
+                    <div class="px-2">
+                        <p class="text-primary text-[10px] font-black uppercase tracking-widest mb-1">Orion Space</p>
+                        <h3 class="font-bold text-on-surface text-lg mb-2">Horizon Chrono V2</h3>
+                        <div class="flex items-center gap-2 mb-6">
+                            <span class="text-2xl font-black text-on-surface">₹49,990</span>
+                            <span class="text-sm text-outline line-through">₹60,000</span>
+                        </div>
+                        <button class="w-full py-3.5 rounded-2xl bg-slate-900 text-white font-bold text-sm hover:sky-gradient transition-all flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-sm">add_shopping_cart</span> Add to Cart
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card-lift group bg-white rounded-3xl p-4 shadow-3d hover:shadow-3d-hover">
+                    <div class="relative h-64 w-full rounded-2xl overflow-hidden bg-slate-50 mb-6">
+                        <img alt="Nimbus Cloud Low" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBy7eMz651z5AxTKaNSldtvlEOVGymzMivZjS9faNSe_bC1efLbDqwZe8NmbuC0o1Z_SmFV7h_JUfgnOIh4iAsDKFAsEn-EN7uN9y5ah2Btcx14Fd8DF0PX7eFxiRsRSp8MlKroOZ-f6tdJ3ZZ8lM0aZk_PsOppSkBeElrSxOHnAc3iQBXX2AXg7CVLtX8g8wKbuAsSqhnebecqL_VVEg30vTD8f9M8fK9Qz2lM2P3xcxR_T4PdV4q4Go_sIoS62Bg5wXOBp9l7XfL_"/>
+                        <span class="absolute top-4 left-4 bg-emerald-500 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter">Best Value</span>
+                    </div>
+                    <div class="px-2">
+                        <p class="text-primary text-[10px] font-black uppercase tracking-widest mb-1">Aurora Fashion</p>
+                        <h3 class="font-bold text-on-surface text-lg mb-2">Nimbus Cloud Low</h3>
+                        <div class="flex items-center gap-2 mb-6">
+                            <span class="text-2xl font-black text-on-surface">₹14,500</span>
+                            <span class="text-sm text-outline line-through">₹18,000</span>
+                        </div>
+                        <button class="w-full py-3.5 rounded-2xl bg-slate-900 text-white font-bold text-sm hover:sky-gradient transition-all flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-sm">add_shopping_cart</span> Add to Cart
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card-lift group bg-white rounded-3xl p-4 shadow-3d hover:shadow-3d-hover">
+                    <div class="relative h-64 w-full rounded-2xl overflow-hidden bg-slate-50 mb-6">
+                        <img alt="Lumina Arch Lamp" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBi0YHpzEOv34LHvb0wDy70BacaImuMHQBP-7WVJR94FbCQOiviAPJ1YXwK1kqWFoJeWflf375abPf4wDMkmmJa5KXhMYXKWaESSKuX9zSbdCz2wHiWOUvS87eQd5SX4APhRA0_zwwRG05fD8JY15TLJY3PTvFBwVYLVQZeLNdTCHLVkH1ixOvGk9nxGBhTqPhgR1ILUzLzyLC9xxYdbY_7BEQR8VwNFgy0PMRz3D-K_lHOB75Cv_2_saa01zEaXC46I44uHCS-Jjoa"/>
+                        <span class="absolute top-4 left-4 bg-amber-500 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter">Limited</span>
+                    </div>
+                    <div class="px-2">
+                        <p class="text-primary text-[10px] font-black uppercase tracking-widest mb-1">Zenith Living</p>
+                        <h3 class="font-bold text-on-surface text-lg mb-2">Lumina Arch Lamp</h3>
+                        <div class="flex items-center gap-2 mb-6">
+                            <span class="text-2xl font-black text-on-surface">₹10,500</span>
+                            <span class="text-sm text-outline line-through">₹16,000</span>
+                        </div>
+                        <button class="w-full py-3.5 rounded-2xl bg-slate-900 text-white font-bold text-sm hover:sky-gradient transition-all flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-sm">add_shopping_cart</span> Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Join The Circle Bento -->
+    <section class="max-w-7xl mx-auto px-6 py-20">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="md:col-span-2 relative h-[450px] rounded-3xl overflow-hidden shadow-3d group">
+                <img alt="Store Community" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCwrt9VQ6mz6KB3vXjXkJx5oJ4fuTBv54bdJaofMcLEvk6G6VvXMltxRdQiAPQTswRsaz2k882t_aLH1dkpbBYJPG7GtBZTfU7iExDMqnaqqddv2ZRC-KV-L_b9kiUTITHGv9L9rtiGHY8Hl0ZCwwyBlVGuHO_HxeDiR0zcJ0aKGgHVzcmcx1_qxtaM--RtiTnH9P3dDZkVcIn7WqrB6A-LdEpnTGRxotmfPn0DSB3bvA0ekKYQ0urE6IJBjOXma1ijqhBbNqi2Z8U"/>
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent flex flex-col justify-end p-12">
+                    <h3 class="text-white text-4xl font-bold mb-4">Start Selling Today</h3>
+                    <p class="text-slate-300 max-w-md mb-8">Join over 5,000 global merchants and scale your brand with SkyCommerce's elite audience.</p>
+                    <a href="{{ url_for('register_page') }}" class="w-fit px-8 py-4 bg-white text-primary font-black rounded-2xl hover:scale-105 transition-transform shadow-xl" style="text-decoration:none;">Register Store</a>
+                </div>
+            </div>
+            <div class="sky-gradient rounded-3xl p-10 flex flex-col justify-between shadow-3d">
+                <div>
+                    <span class="material-symbols-outlined text-white text-6xl mb-8" data-icon="verified">verified</span>
+                    <h3 class="text-white text-3xl font-bold leading-tight">Elite Club Early Access</h3>
+                    <p class="text-sky-100 mt-4 leading-relaxed">Unlock zero transaction fees for your first 3 months as a verified merchant.</p>
+                </div>
+                <button onclick="window.location.href='/register'" class="w-full py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 transition-all shadow-lg">Apply Now</button>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="w-full border-t border-slate-200 bg-white">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-12 px-8 py-16 max-w-7xl mx-auto">
+        <div class="col-span-2 md:col-span-1">
+            <a class="text-2xl font-bold tracking-tight text-primary flex items-center gap-2 mb-6" href="#">
+                <span class="material-symbols-outlined text-3xl">hub</span>
+                <span>SkyCommerce</span>
+            </a>
+            <p class="text-slate-500 text-sm leading-relaxed mb-8">The next-generation multi-store infrastructure. Empowering visionary merchants across the globe.</p>
+            <div class="flex gap-4">
+                <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 hover:text-primary transition-colors cursor-pointer">
+                    <span class="material-symbols-outlined text-lg">public</span>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 hover:text-primary transition-colors cursor-pointer">
+                    <span class="material-symbols-outlined text-lg">share</span>
+                </div>
+            </div>
+        </div>
+        <div>
+            <h5 class="font-bold text-slate-900 mb-8 text-sm uppercase tracking-widest">Ecosystem</h5>
+            <ul class="space-y-4 text-slate-500 text-sm font-medium">
+                <li><a class="hover:text-primary transition-colors" href="#">Merchant Hub</a></li>
+                <li><a class="hover:text-primary transition-colors" href="#">Affiliate Program</a></li>
+                <li><a class="hover:text-primary transition-colors" href="#">Partner Stores</a></li>
+                <li><a class="hover:text-primary transition-colors" href="#">Developers</a></li>
+            </ul>
+        </div>
+        <div>
+            <h5 class="font-bold text-slate-900 mb-8 text-sm uppercase tracking-widest">Platform</h5>
+            <ul class="space-y-4 text-slate-500 text-sm font-medium">
+                <li><a class="hover:text-primary transition-colors" href="#">About Hub</a></li>
+                <li><a class="hover:text-primary transition-colors" href="#">Security</a></li>
+                <li><a class="hover:text-primary transition-colors" href="#">Global Logistics</a></li>
+                <li><a class="hover:text-primary transition-colors" href="#">Success Stories</a></li>
+            </ul>
+        </div>
+        <div>
+            <h5 class="font-bold text-slate-900 mb-8 text-sm uppercase tracking-widest">Legal</h5>
+            <ul class="space-y-4 text-slate-500 text-sm font-medium">
+                <li><a class="hover:text-primary transition-colors" href="#">Privacy Hub</a></li>
+                <li><a class="hover:text-primary transition-colors" href="#">Store Terms</a></li>
+                <li><a class="hover:text-primary transition-colors" href="#">User Policy</a></li>
+            </ul>
         </div>
     </div>
-</div>
+    <div class="max-w-7xl mx-auto px-8 py-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
+        <span class="text-slate-400 text-xs font-medium">© 2024 SkyCommerce Platform. All Verified Merchants reserved.</span>
+        <div class="flex gap-8 items-center">
+            <span class="material-symbols-outlined text-slate-300" data-icon="payments">payments</span>
+            <span class="material-symbols-outlined text-slate-300" data-icon="credit_card">credit_card</span>
+            <span class="material-symbols-outlined text-slate-300" data-icon="shield_with_heart">shield_with_heart</span>
+        </div>
+    </div>
+</footer>
 
-<style>
-    .landing-container {
-        max-width: 1000px;
-        margin: 0 auto;
-        padding: 40px 20px;
-        text-align: center;
-    }
-
-    .hero-section {
-        margin-bottom: 50px;
-    }
-
-    .hero-section h1 {
-        font-size: 2.5rem;
-        color: #333;
-        margin-bottom: 10px;
-    }
-
-    .hero-section p {
-        font-size: 1.2rem;
-        color: #666;
-    }
-
-    .role-selection {
-        display: flex;
-        justify-content: center;
-        gap: 30px;
-        flex-wrap: wrap;
-    }
-
-    .role-card {
-        flex: 1;
-        min-width: 300px;
-        max-width: 400px;
-        background: white;
-        padding: 40px;
-        border-radius: 10px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        transition: transform 0.3s ease;
-    }
-
-    .role-card:hover {
-        transform: translateY(-5px);
-    }
-
-    .card-icon {
-        font-size: 4rem;
-        margin-bottom: 20px;
-    }
-
-    .role-card h2 {
-        margin-bottom: 15px;
-        color: #2c3e50;
-    }
-
-    .role-card p {
-        color: #7f8c8d;
-        margin-bottom: 25px;
-    }
-
-    .btn-primary, .btn-secondary {
-        display: inline-block;
-        padding: 12px 25px;
-        border-radius: 5px;
-        text-decoration: none;
-        font-weight: bold;
-        transition: background 0.3s;
-    }
-
-    .btn-primary {
-        background-color: #3498db;
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background-color: #2980b9;
-    }
-
-    .btn-secondary {
-        background-color: #27ae60;
-        color: white;
-    }
-
-    .btn-secondary:hover {
-        background-color: #2ecc71;
-    }
-</style>
-{% endblock %}
+<script src="/static/js/buttons.js"></script>
+</body>
+</html>

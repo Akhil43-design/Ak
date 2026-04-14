@@ -1,61 +1,67 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Checkout | Smart Retail Shopping</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+        theme: { extend: { colors: { primary: '#2e7d32', secondary: '#ef6c00', surface: '#fbfaf8' }, fontFamily: { sans: ['Poppins','sans-serif'] } } }
+    }
+</script>
+<style>.material-symbols-outlined { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }</style>
+</head>
+<body class="bg-surface font-sans min-h-screen flex flex-col">
 
-{% block title %}Checkout - Smart QR Shopping{% endblock %}
-
-{% block content %}
-<div class="container">
-    <div class="page-header">
-        <h1>Checkout</h1>
+<!-- Nav -->
+<nav class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
+        <button onclick="window.location.href='/cart'" class="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center text-gray-600">
+            <span class="material-symbols-outlined text-xl">arrow_back</span>
+        </button>
+        <span class="font-bold text-primary flex items-center gap-2">
+            <span class="material-symbols-outlined text-xl">credit_card</span> Secure Checkout
+        </span>
+        <div class="w-9"></div>
     </div>
+</nav>
 
-    <div class="checkout-container">
-        <div class="checkout-form card">
-            <h2>Delivery Information</h2>
-            <form onsubmit="handleCheckout(event)">
-                <div class="form-group">
-                    <label>Delivery Method</label>
-                    <select id="delivery-method" onchange="toggleAddress()" required>
-                        <option value="">Select delivery method</option>
-                        <option value="home_delivery">Home Delivery</option>
-                        <option value="self_pickup">Self Pickup</option>
-                    </select>
-                </div>
+<main class="flex-1 max-w-2xl mx-auto w-full px-4 py-6 pb-32">
 
-                <div id="address-section" class="form-group" style="display: none;">
-                    <label>Delivery Address</label>
-                    <textarea id="delivery-address" rows="3"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <h3>Payment Simulation</h3>
-                    <p class="info-text">This is a demo payment. No actual transaction will occur.</p>
-                    <div class="payment-info">
-                        <label>
-                            <input type="radio" name="payment" value="card" checked>
-                            Credit/Debit Card
-                        </label>
-                        <label>
-                            <input type="radio" name="payment" value="cash">
-                            Cash on Delivery
-                        </label>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-primary btn-block">Place Order</button>
-            </form>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-5">
+        <div class="p-5 border-b border-gray-100">
+            <h2 class="font-bold text-gray-900">Order Summary</h2>
         </div>
-
-        <div class="order-summary card">
-            <h2>Order Summary</h2>
-            <div id="checkout-items"></div>
-            <div class="summary-total">
-                <strong>Total: <span id="checkout-total">$0.00</span></strong>
+        <div id="checkout-items" class="p-5 space-y-3">
+            <p class="text-gray-400 text-sm italic">Loading order...</p>
+        </div>
+        <div class="px-5 pb-5">
+            <div class="flex justify-between items-center py-4 border-t border-gray-100">
+                <span class="text-gray-500 font-medium text-sm">Total Amount</span>
+                <span id="checkout-total" class="text-2xl font-black text-gray-900">₹0</span>
             </div>
         </div>
     </div>
-</div>
-{% endblock %}
 
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/cart.js') }}"></script>
-{% endblock %}
+    <div class="bg-green-50 rounded-2xl p-4 flex items-start gap-3 mb-5 border border-green-100">
+        <span class="material-symbols-outlined text-primary text-xl flex-shrink-0 mt-0.5">volunteer_activism</span>
+        <p class="text-xs text-green-800 leading-relaxed">By placing this order, you are directly supporting authentic Indian village artisans and farmers. Every rupee counts!</p>
+    </div>
+
+    <button onclick="placeOrder()" class="w-full py-4 bg-primary hover:bg-green-800 text-white font-bold rounded-2xl shadow-xl transition-all flex justify-center items-center gap-2 text-base">
+        <span class="material-symbols-outlined">check_circle</span> Confirm Order
+    </button>
+</main>
+
+<script src="{{ url_for('static', filename='js/customer.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof loadCheckout === 'function') loadCheckout();
+    });
+</script>
+<script src="/static/js/buttons.js"></script>
+</body>
+</html>

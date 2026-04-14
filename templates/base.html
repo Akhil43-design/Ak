@@ -9,41 +9,123 @@
 </head>
 
 <body>
-    <!-- Navigation Bar -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-brand">
-                <h2>🛒 Smart QR Shopping</h2>
+    <!-- Amazon Style Navigation Bar -->
+    <header class="amz-header">
+        <div class="amz-nav-top">
+            <div class="amz-nav-left">
+                <a href="/" class="amz-brand">
+                    <h2>Amazonia</h2>
+                </a>
+                <div class="amz-nav-location">
+                    <span class="loc-line1">Deliver to User</span>
+                    <span class="loc-line2">Select your address</span>
+                </div>
             </div>
-            <div class="nav-links">
+            
+            <div class="amz-nav-search">
+                <select class="amz-search-dropdown">
+                    <option value="all">All</option>
+                    <option value="electronics">Electronics</option>
+                    <option value="fashion">Fashion</option>
+                </select>
+                <input type="text" class="amz-search-input" placeholder="Search Amazonia">
+                <button class="amz-search-btn">🔍</button>
+            </div>
+            
+            <div class="amz-nav-right">
                 {% if session.user_id %}
-                {% if session.role == 'customer' %}
-                <a href="{{ url_for('customer_dashboard') }}">Home</a>
-                <a href="{{ url_for('scanner_page') }}">Premium Scanner</a>
-                <a href="{{ url_for('cart') }}">Cart</a>
-                {% elif session.role == 'store_owner' %}
-                <a href="{{ url_for('store_dashboard') }}">Dashboard</a>
-                <a href="{{ url_for('owner_page') }}">Premium Studio</a>
-                {% endif %}
-                <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+                    <div class="amz-nav-item">
+                        <span class="nav-line1">Hello, {{ session.email.split('@')[0] if session.email else 'User' }}</span>
+                        <span class="nav-line2">Account & Lists ▾</span>
+                        <div class="amz-dropdown-menu">
+                            {% if session.get('role') == 'customer' %}
+                            <a href="{{ url_for('customer_dashboard') }}">Your Dashboard</a>
+                            <a href="{{ url_for('history') }}">Your Browsing History</a>
+                            {% elif session.get('role') == 'store_owner' %}
+                            <a href="{{ url_for('store_dashboard') }}">Seller Central</a>
+                            <a href="{{ url_for('owner_page') }}">Add Products</a>
+                            {% endif %}
+                            <a href="{{ url_for('logout') }}">Sign Out</a>
+                        </div>
+                    </div>
+                    {% if session.get('role') == 'customer' %}
+                    <a href="{{ url_for('history') }}" class="amz-nav-item">
+                        <span class="nav-line1">Returns</span>
+                        <span class="nav-line2">& Orders</span>
+                    </a>
+                    <a href="{{ url_for('cart') }}" class="amz-nav-cart">
+                        <span class="cart-icon">🛒</span>
+                        <span class="cart-count">0</span>
+                        <span class="nav-line2">Cart</span>
+                    </a>
+                    {% endif %}
                 {% else %}
-                <a href="{{ url_for('login') }}">Login</a>
+                    <a href="{{ url_for('login') }}" class="amz-nav-item">
+                        <span class="nav-line1">Hello, sign in</span>
+                        <span class="nav-line2">Account & Lists ▾</span>
+                    </a>
+                    <a href="{{ url_for('login') }}" class="amz-nav-item">
+                        <span class="nav-line1">Returns</span>
+                        <span class="nav-line2">& Orders</span>
+                    </a>
+                    <a href="{{ url_for('login') }}" class="amz-nav-cart">
+                        <span class="cart-icon">🛒</span>
+                        <span class="cart-count">0</span>
+                        <span class="nav-line2">Cart</span>
+                    </a>
                 {% endif %}
             </div>
         </div>
-    </nav>
+        
+        <div class="amz-nav-bottom">
+            <a href="#" class="amz-nav-menu">☰ All</a>
+            <a href="#">Today's Deals</a>
+            <a href="#">Customer Service</a>
+            <a href="#">Registry</a>
+            <a href="#">Gift Cards</a>
+            <a href="#">Sell</a>
+        </div>
+    </header>
 
     <!-- Main Content -->
-    <main class="main-content">
+    <main class="amz-main-content">
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <p>&copy; 2026 Smart QR Shopping. All rights reserved.</p>
+    <!-- Amazon Style Footer -->
+    <footer class="amz-footer">
+        <div class="amz-footer-top">
+            <a href="#">Back to top</a>
+        </div>
+        <div class="amz-footer-links">
+            <div class="footer-col">
+                <h3>Get to Know Us</h3>
+                <a href="#">Careers</a>
+                <a href="#">About Amazonia</a>
+            </div>
+            <div class="footer-col">
+                <h3>Make Money with Us</h3>
+                <a href="#">Sell products on Amazonia</a>
+                <a href="#">Become an Affiliate</a>
+            </div>
+            <div class="footer-col">
+                <h3>Amazonia Payment</h3>
+                <a href="#">Amazonia Business Card</a>
+                <a href="#">Shop with Points</a>
+            </div>
+            <div class="footer-col">
+                <h3>Let Us Help You</h3>
+                <a href="#">Your Account</a>
+                <a href="#">Your Orders</a>
+            </div>
+        </div>
+        <div class="amz-footer-bottom">
+            <p>&copy; 2026, Amazonia.com, Inc. or its affiliates. (Smart QR Shopping)</p>
+        </div>
     </footer>
 
     {% block scripts %}{% endblock %}
+<script src="/static/js/buttons.js"></script>
 </body>
 
 </html>

@@ -12,39 +12,36 @@ async function loadProductDetails() {
         const product = await response.json();
 
         const productDetail = document.getElementById('product-detail');
-
         const imageUrl = product.image || 'https://via.placeholder.com/400x400?text=No+Image';
 
-        productDetail.innerHTML = `
-            <div class="product-detail-grid">
-                <div>
-                    <img src="${imageUrl}" alt="${product.name}" class="product-image">
-                </div>
-                <div class="product-details">
-                    <h1>${product.name}</h1>
-                    <div class="product-price">$${parseFloat(product.price).toFixed(2)}</div>
-                    
-                    <div class="product-meta">
-                        ${product.size ? `<div class="meta-item">Size: ${product.size}</div>` : ''}
-                        ${product.color ? `<div class="meta-item">Color: ${product.color}</div>` : ''}
-                        <div class="meta-item">Stock: ${product.stock}</div>
-                    </div>
-                    
-                    <div class="qr-code-section" style="margin: 20px 0; text-align: center;">
-                        <p><strong>Scan to Store</strong></p>
-                        <img src="/api/qr/${storeId}/${productId}" alt="Product QR Code" style="max-width: 150px; border: 1px solid #ddd; padding: 5px;">
-                    </div>
-                    
-                    <p>${product.description || 'No description available'}</p>
-                    
-                    <button onclick="addToCart()" class="btn-primary btn-block">Add to Cart</button>
-                </div>
-            </div>
-        `;
+        const imgEl = document.getElementById('product-main-image');
+        if (imgEl) imgEl.src = imageUrl;
+
+        const nameNavEl = document.getElementById('product-name-nav');
+        if (nameNavEl) nameNavEl.textContent = product.name;
+
+        const titleEl = document.getElementById('product-title');
+        if (titleEl) titleEl.innerHTML = `${product.name} <span class="block text-2xl font-medium text-outline mt-1 italic"></span>`;
+
+        const priceEl = document.getElementById('product-price');
+        if (priceEl) priceEl.textContent = `₹${parseFloat(product.price).toFixed(2)}`;
+
+        const stockEl = document.getElementById('product-stock');
+        if (stockEl) stockEl.textContent = `Stock Available: ${product.stock}`;
+
+        const descEl = document.getElementById('product-description');
+        if (descEl) descEl.textContent = product.description || 'No description available';
+
+        const qrCodeSection = document.getElementById('qr-code-section');
+        const qrCodeImg = document.getElementById('product-qr-code');
+        if (qrCodeSection && qrCodeImg) {
+            qrCodeImg.src = `/api/qr/${storeId}/${productId}`;
+            qrCodeSection.classList.remove('hidden');
+        }
+
     } catch (error) {
         console.error('Error loading product:', error);
-        document.getElementById('product-detail').innerHTML =
-            '<div class="empty-state"><h3>Product not found</h3></div>';
+        // Fallback or error state can be handled here without wiping the whole page
     }
 }
 

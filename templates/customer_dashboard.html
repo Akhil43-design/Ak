@@ -1,284 +1,201 @@
-{% extends "base.html" %}
-
-{% block content %}
-<style>
-    :root {
-        --scanner-border-color: #00ff00;
-        --scanner-bg: #000000;
-        --card-bg: #ffffff;
-        --text-color: #333333;
-    }
-
-    body {
-        background-color: #121212;
-        /* Dark theme background */
-        color: #ffffff;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    /* Scanner Container */
-    .scanner-wrapper {
-        position: relative;
-        width: 100%;
-        max-width: 500px;
-        margin: 0 auto;
-        border-radius: 20px;
-        overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        background: #000;
-    }
-
-    #qr-reader {
-        width: 100%;
-        border-radius: 20px;
-    }
-
-    /* Custom Scanning Frame Overlay */
-    .scan-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        background:
-            linear-gradient(to right, #000 4px, transparent 4px) 0 0,
-            linear-gradient(to right, #000 4px, transparent 4px) 0 100%,
-            linear-gradient(to left, #000 4px, transparent 4px) 100% 0,
-            linear-gradient(to left, #000 4px, transparent 4px) 100% 100%,
-            linear-gradient(to bottom, #000 4px, transparent 4px) 0 0,
-            linear-gradient(to bottom, #000 4px, transparent 4px) 100% 0,
-            linear-gradient(to top, #000 4px, transparent 4px) 0 100%,
-            linear-gradient(to top, #000 4px, transparent 4px) 100% 100%;
-        background-repeat: no-repeat;
-        background-size: 40px 40px;
-        box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
-    }
-
-    /* Glowing Line Animation */
-    .scan-line {
-        position: absolute;
-        width: 100%;
-        height: 2px;
-        background: #00ff00;
-        box-shadow: 0 0 10px #00ff00;
-        top: 0;
-        animation: scanAnim 2s infinite linear;
-        display: none;
-        /* Shown when scanning */
-    }
-
-    @keyframes scanAnim {
-        0% {
-            top: 10%;
-            opacity: 0;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Dashboard | Smart Retail Shopping</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { primary: '#2e7d32', secondary: '#ef6c00', surface: '#fbfaf8', onSurface: '#333333' },
+                    fontFamily: { sans: ['Poppins', 'sans-serif'] }
+                }
+            }
         }
-
-        10% {
-            opacity: 1;
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .hero-pattern {
+            background-color: #2e7d32;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
         }
+        .store-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .store-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px -6px rgba(46,125,50,0.15); }
+    </style>
+</head>
+<body class="bg-surface font-sans text-onSurface min-h-screen">
 
-        90% {
-            opacity: 1;
-        }
-
-        100% {
-            top: 90%;
-            opacity: 0;
-        }
-    }
-
-    /* Product Card Modal */
-    .product-modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.85);
-        z-index: 1000;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-        backdrop-filter: blur(5px);
-    }
-
-    .product-card-modern {
-        background: white;
-        color: #333;
-        width: 100%;
-        max-width: 350px;
-        border-radius: 20px;
-        padding: 25px;
-        text-align: center;
-        transform: scale(0.8);
-        opacity: 0;
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-
-    .product-card-modern.show {
-        transform: scale(1);
-        opacity: 1;
-    }
-
-    .product-icon {
-        font-size: 50px;
-        margin-bottom: 15px;
-    }
-
-    .product-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: 5px;
-        color: #000;
-    }
-
-    .product-price {
-        font-size: 2rem;
-        color: #27ae60;
-        font-weight: 800;
-        margin: 10px 0;
-    }
-
-    .product-meta {
-        display: flex;
-        justify-content: space-between;
-        margin: 15px 0;
-        padding: 10px;
-        background: #f8f9fa;
-        border-radius: 10px;
-        font-size: 0.9rem;
-    }
-
-    .btn-action {
-        width: 100%;
-        padding: 15px;
-        border: none;
-        border-radius: 12px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: transform 0.2s;
-        margin-top: 10px;
-    }
-
-    .btn-add {
-        background: #000;
-        color: white;
-    }
-
-    .btn-reset {
-        background: #e0e0e0;
-        color: #333;
-    }
-
-    .btn-action:active {
-        transform: scale(0.95);
-    }
-
-    /* Upload & Controls */
-    .scanner-controls {
-        display: flex;
-        gap: 10px;
-        margin-top: 20px;
-        justify-content: center;
-    }
-
-    .control-btn {
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: white;
-        padding: 10px 20px;
-        border-radius: 30px;
-        font-size: 0.9rem;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    #file-input {
-        display: none;
-    }
-</style>
-
-<div class="container-fluid p-0">
-    <!-- Premium Scanner Promo -->
-    <div class="card"
-        style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; border: none; padding: 2.5rem; text-align: center; margin-bottom: 2rem; border-radius: 24px; position: relative; overflow: hidden;">
-        <div
-            style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: rgba(99, 102, 241, 0.2); border-radius: 50%; filter: blur(40px);">
+<!-- Navbar -->
+<nav class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-2.5 min-w-0">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-primary flex items-center justify-center text-white flex-shrink-0">
+                <span class="material-symbols-outlined text-lg">storefront</span>
+            </div>
+            <span class="font-bold text-base sm:text-lg text-primary truncate">Smart Retail Shopping</span>
         </div>
-        <div style="position: relative; z-index: 1;">
-            <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -1px;">Shop Smart.
-                Anywhere.</h1>
-            <p style="opacity: 0.8; margin-bottom: 2rem; font-size: 1.1rem;">Scan QR codes or browse local stores to
-                start your premium shopping experience.</p>
+        <div class="flex items-center gap-2 sm:gap-4">
+            <a href="{{ url_for('scanner_page') }}" class="flex items-center gap-1 text-gray-500 hover:text-primary transition-colors p-2 rounded-lg hover:bg-green-50">
+                <span class="material-symbols-outlined text-xl">qr_code_scanner</span>
+                <span class="hidden sm:inline text-sm font-medium">Scan</span>
+            </a>
+            <a href="{{ url_for('cart') }}" class="flex items-center gap-1 text-gray-500 hover:text-primary transition-colors p-2 rounded-lg hover:bg-green-50">
+                <span class="material-symbols-outlined text-xl">shopping_basket</span>
+                <span class="hidden sm:inline text-sm font-medium">Cart</span>
+            </a>
+            <a href="{{ url_for('logout') }}" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs sm:text-sm font-bold rounded-lg transition-colors">
+                Logout
+            </a>
+        </div>
+    </div>
+</nav>
 
-            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-                <a href="{{ url_for('scanner_page') }}" class="btn-primary"
-                    style="background: #6366f1; border: none; padding: 1.2rem 2.5rem; font-size: 1.1rem; border-radius: 15px; display: inline-flex; align-items: center; gap: 0.8rem; text-decoration: none; font-weight: 600; box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);">
-                    <span style="font-size: 1.4rem;">📷</span> Open Premium Scanner
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8 space-y-6 sm:space-y-8">
+
+    <!-- Hero Banner -->
+    <section class="hero-pattern rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-12 text-white shadow-xl relative overflow-hidden">
+        <div class="relative z-10 max-w-2xl">
+            <span class="uppercase tracking-widest text-xs font-bold bg-white/20 px-3 py-1 rounded-full mb-4 inline-block">The Process</span>
+            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 leading-tight">Direct from Villages<br/>to Your Local Mart.</h1>
+            <p class="text-green-100 text-sm sm:text-base mb-5 leading-relaxed max-w-lg">
+                Experience authentic Indian village craftsmanship. No middlemen — pure quality, fair trade directly from artisans and farmers.
+            </p>
+            <div class="flex flex-wrap gap-3">
+                <a href="{{ url_for('scanner_page') }}" class="bg-secondary hover:bg-orange-600 text-white font-bold py-2.5 px-5 rounded-xl flex items-center gap-2 transition-colors shadow-lg text-sm">
+                    <span class="material-symbols-outlined text-base">qr_code_scanner</span> Scan Product In‑Store
                 </a>
-
-                <a href="{{ url_for('request_product') }}" class="btn-primary"
-                    style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 1.2rem 2.5rem; font-size: 1.1rem; border-radius: 15px; display: inline-flex; align-items: center; gap: 0.8rem; text-decoration: none; font-weight: 600; color: white;">
-                    <span>📝</span> Request a Product
+                <a href="{{ url_for('cart') }}" class="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold py-2.5 px-5 rounded-xl flex items-center gap-2 transition-colors text-sm">
+                    <span class="material-symbols-outlined text-base">shopping_basket</span> My Cart
                 </a>
             </div>
         </div>
-    </div>
-
-    <div style="padding: 0 1rem; margin-bottom: 30px;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-            <div>
-                <h2 style="font-weight: 700; margin-bottom: 5px; color: #fff; font-size: 1.8rem;">Nearby Stores</h2>
-                <p style="opacity: 0.6; margin: 0;">Discover shops with active smart inventory</p>
+        <!-- Process Steps (hidden on mobile) -->
+        <div class="hidden md:flex absolute right-8 top-1/2 -translate-y-1/2 flex-col gap-3 opacity-90">
+            <div class="bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/20 flex items-center gap-2">
+                <span class="material-symbols-outlined text-xl">agriculture</span>
+                <span class="text-xs font-bold">Village Harvest</span>
+            </div>
+            <div class="bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/20 flex items-center gap-2 ml-8">
+                <span class="material-symbols-outlined text-xl">local_shipping</span>
+                <span class="text-xs font-bold">Direct Transport</span>
+            </div>
+            <div class="bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/20 flex items-center gap-2">
+                <span class="material-symbols-outlined text-xl">store</span>
+                <span class="text-xs font-bold">Local Mart</span>
             </div>
         </div>
-    </div>
+    </section>
 
-    <div id="stores-list" class="grid" style="padding: 0 1rem;">
-        <div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.3); grid-column: 1/-1;">
-            <p>Scanning for nearby stores...</p>
-        </div>
-    </div>
-</div>
+    <!-- Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-<!-- Audio for Beep -->
-<audio id="scan-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
-
-<!-- Result Modal -->
-<div class="product-modal" id="result-modal">
-    <div class="product-card-modern" id="modal-card">
-        <div class="product-icon">📦</div>
-        <div class="product-title" id="p-name">Loading...</div>
-        <div class="product-price" id="p-price">...</div>
-
-        <div class="product-meta">
-            <div>
-                <span style="display:block; opacity:0.5; font-size: 0.8em;">WEIGHT</span>
-                <span id="p-weight" style="font-weight: 600;">-</span>
+        <!-- Partner Stores -->
+        <div class="lg:col-span-2 space-y-4">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg sm:text-xl font-bold">Partner Village Marts</h2>
             </div>
-            <div>
-                <span style="display:block; opacity:0.5; font-size: 0.8em;">STORE</span>
-                <span id="p-store" style="font-weight: 600;">-</span>
+            <div id="stores-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Skeleton loaders -->
+                <div class="bg-white rounded-2xl p-4 animate-pulse"><div class="h-4 bg-gray-100 rounded mb-3 w-2/3"></div><div class="h-3 bg-gray-100 rounded w-1/2"></div></div>
+                <div class="bg-white rounded-2xl p-4 animate-pulse"><div class="h-4 bg-gray-100 rounded mb-3 w-2/3"></div><div class="h-3 bg-gray-100 rounded w-1/2"></div></div>
             </div>
         </div>
 
-        <button class="btn-action btn-add" id="btn-add-cart" onclick="addToCart()">
-            ADD TO CART
-        </button>
-        <button class="btn-action btn-reset" onclick="resetScanner()">
-            SCAN NEXT
-        </button>
+        <!-- Right Sidebar -->
+        <div class="space-y-5">
+            <!-- Recent Orders -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <h3 class="text-base font-bold mb-4 flex items-center gap-2 text-gray-900">
+                    <span class="material-symbols-outlined text-primary text-xl">history</span> Recent Orders
+                </h3>
+                <div id="history-container" class="space-y-3">
+                    <p class="text-gray-400 text-sm italic">No recent orders yet.</p>
+                </div>
+            </div>
+
+            <!-- Rewards -->
+            <div class="bg-orange-50 rounded-2xl p-5 border border-orange-100">
+                <h3 class="text-sm font-bold mb-2 text-secondary flex items-center gap-2">
+                    <span class="material-symbols-outlined text-base">loyalty</span> Village Rewards
+                </h3>
+                <p class="text-xs text-gray-600 mb-3">Every purchase empowers a community.</p>
+                <div class="text-2xl font-black text-secondary">450 pts</div>
+            </div>
+        </div>
     </div>
-</div>
+</main>
 
-{% endblock %}
+<!-- Bottom nav for mobile -->
+<nav class="fixed bottom-0 inset-x-0 bg-white border-t border-gray-100 flex lg:hidden z-40 shadow-lg">
+    <a href="{{ url_for('customer_dashboard') }}" class="flex-1 flex flex-col items-center justify-center py-3 text-primary gap-0.5">
+        <span class="material-symbols-outlined text-xl">home</span>
+        <span class="text-[10px] font-semibold">Home</span>
+    </a>
+    <a href="{{ url_for('scanner_page') }}" class="flex-1 flex flex-col items-center justify-center py-3 text-gray-400 hover:text-primary gap-0.5">
+        <span class="material-symbols-outlined text-xl">qr_code_scanner</span>
+        <span class="text-[10px] font-semibold">Scan</span>
+    </a>
+    <a href="{{ url_for('cart') }}" class="flex-1 flex flex-col items-center justify-center py-3 text-gray-400 hover:text-primary gap-0.5">
+        <span class="material-symbols-outlined text-xl">shopping_basket</span>
+        <span class="text-[10px] font-semibold">Cart</span>
+    </a>
+    <a href="{{ url_for('logout') }}" class="flex-1 flex flex-col items-center justify-center py-3 text-gray-400 hover:text-primary gap-0.5">
+        <span class="material-symbols-outlined text-xl">logout</span>
+        <span class="text-[10px] font-semibold">Logout</span>
+    </a>
+</nav>
+<div class="h-16 lg:hidden"></div><!-- spacer for bottom nav -->
 
-{% block scripts %}
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<script src="{{ url_for('static', filename='js/customer.js') }}?v=21"></script>
-{% endblock %}
+<script src="{{ url_for('static', filename='js/customer.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof loadHistory === 'function') loadHistory();
+        loadStores();
+    });
+
+    async function loadStores() {
+        try {
+            const res = await fetch('/api/stores');
+            const data = await res.json();
+            const list = document.getElementById('stores-list');
+            
+            // Normalize data: preserve IDs
+            let stores = [];
+            if (Array.isArray(data)) {
+                stores = data;
+            } else if (data && typeof data === 'object' && !data.error) {
+                stores = Object.entries(data).map(([id, val]) => ({ id, ...val }));
+            }
+
+            if (!stores.length) {
+                list.innerHTML = '<p class="text-gray-400 text-sm italic col-span-2">No stores registered yet.</p>';
+                return;
+            }
+
+            list.innerHTML = stores.map(s => `
+                <a href="/store/${s.id}" class="store-card bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-start gap-3 hover:border-primary/30 transition-all">
+                    <div class="w-11 h-11 rounded-xl bg-green-50 flex items-center justify-center text-primary flex-shrink-0">
+                        <span class="material-symbols-outlined">storefront</span>
+                    </div>
+                    <div class="min-w-0">
+                        <h3 class="font-bold text-gray-800 text-sm truncate">${s.name || 'Mart'}</h3>
+                        <p class="text-xs text-gray-500 mt-0.5 line-clamp-2">${s.description || 'Village-sourced products'}</p>
+                        <span class="inline-flex items-center gap-1 mt-2 text-xs font-bold text-primary">
+                            Visit Store <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                        </span>
+                    </div>
+                </a>
+            `).join('');
+        } catch(e) {
+            console.error(e);
+            document.getElementById('stores-list').innerHTML = '<p class="text-gray-400 text-sm italic">Failed to load stores.</p>';
+        }
+    }
+</script>
+<script src="/static/js/buttons.js"></script>
+</body>
+</html>

@@ -1,179 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scan Product QR</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/qr_pages.css') }}">
-    <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛒</text></svg>">
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" crossorigin="anonymous"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"
-        crossorigin="anonymous"></script>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Scan Product | Smart Retail Shopping</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript" crossorigin="anonymous"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { primary: '#2e7d32', secondary: '#ef6c00', surface: '#fbfaf8' },
+                    fontFamily: { sans: ['Poppins', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        #reader { width: 100%; max-width: 320px; margin: 0 auto; border-radius: 1rem; overflow: hidden; }
+        /* Smooth card pop-in */
+        .product-card { transform: scale(0); opacity: 0; display: none; transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease; }
+        .product-card.show { transform: scale(1); opacity: 1; }
+    </style>
 </head>
+<body class="bg-surface font-sans min-h-screen flex flex-col">
 
-<body>
+<!-- Top Nav -->
+<nav class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
+        <button onclick="window.history.back()" class="w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition-colors">
+            <span class="material-symbols-outlined text-xl">arrow_back</span>
+        </button>
+        <span class="font-bold text-primary">Scan Product QR</span>
+        <a href="{{ url_for('cart') }}" class="w-9 h-9 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition-colors">
+            <span class="material-symbols-outlined text-xl">shopping_basket</span>
+        </a>
+    </div>
+</nav>
 
-    <div class="container">
-        <div class="premium-card">
-            <h2>Scan QR Code</h2>
-            <p class="subtitle">Focus the QR code within the frame</p>
+<div class="flex-1 flex flex-col items-center justify-start px-4 py-6 max-w-md mx-auto w-full">
 
-            <div id="reader"></div>
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <div class="w-14 h-14 bg-green-100 text-primary rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-sm">
+            <span class="material-symbols-outlined text-3xl">qr_code_scanner</span>
+        </div>
+        <h1 class="text-lg font-bold text-gray-900">Point at the QR code</h1>
+        <p class="text-sm text-gray-500 mt-1">Hold the camera steady to scan village mart products</p>
+    </div>
 
-            <div id="result-container" class="product-details">
-                <h3>Product Details</h3>
-                <div id="result-content">
-                    <!-- Data will be injected here -->
+    <!-- Scanner -->
+    <div id="scanner-wrapper" class="w-full">
+        <div id="reader" class="shadow-xl border-2 border-gray-200 rounded-2xl overflow-hidden bg-white"></div>
+    </div>
+
+    <!-- Status -->
+    <p id="scan-status" class="text-sm text-gray-400 mt-4 text-center"></p>
+
+    <!-- Product Card (hidden until scanned) -->
+    <div id="productCard" class="product-card w-full bg-white rounded-2xl shadow-xl border border-gray-100 mt-6 overflow-hidden">
+        <div class="bg-gradient-to-r from-primary to-green-700 px-5 py-3 flex items-center gap-2">
+            <span class="material-symbols-outlined text-white text-base">verified</span>
+            <span class="text-white text-xs font-bold uppercase tracking-widest">Verified Village Product</span>
+        </div>
+        <div class="p-5">
+            <h2 id="p-name" class="text-xl font-bold text-gray-900 mb-1"></h2>
+            <p id="p-price" class="text-2xl font-black text-primary mb-3"></p>
+            <div class="space-y-1.5 mb-5">
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <span class="material-symbols-outlined text-base text-gray-400">scale</span>
+                    <span id="p-size">—</span>
                 </div>
-                <button onclick="restartScanner()"
-                    style="background: rgba(255,255,255,0.1); color: var(--text-muted); margin-top: 1.5rem;">Scan
-                    Another</button>
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <span class="material-symbols-outlined text-base text-gray-400">storefront</span>
+                    <span id="p-store">—</span>
+                </div>
             </div>
-
-            <div id="loading" style="display:none; color: var(--text-muted); margin-top: 1rem;">
-                Searching for product...
+            <div class="flex gap-3">
+                <button onclick="addToCart()" class="flex-1 py-3 bg-primary hover:bg-green-800 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2 text-sm">
+                    <span class="material-symbols-outlined text-base">add_shopping_cart</span> Add to Cart
+                </button>
+                <button onclick="resetScan()" class="py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors text-sm">
+                    Rescan
+                </button>
             </div>
         </div>
     </div>
 
-    <script>
-        const firebaseConfig = {{ firebase_config | tojson }};
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+    <!-- Reset button (shows when scanning) -->
+    <button id="resetBtn" onclick="resetScan()" class="mt-5 px-6 py-2.5 border border-gray-300 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors hidden">
+        ↺ Reset Scanner
+    </button>
 
-        let html5QrCode;
-        const scannerConfig = { fps: 10, qrbox: { width: 250, height: 250 } };
+</div>
 
-        async function onScanSuccess(decodedText, decodedResult) {
-            console.log(`Code matched = ${decodedText}`, decodedResult);
+<script>
+let scanned = false;
+let currentProductId = null;
+let currentStoreId = null;
+let html5QrCode;
 
-            await html5QrCode.stop();
+async function onScanSuccess(decodedText) {
+    if (scanned) return;
+    scanned = true;
 
-            document.getElementById("loading").style.display = "block";
-            document.getElementById("reader").style.display = "none";
+    document.getElementById('scan-status').textContent = 'Product found! Loading details...';
+    document.getElementById('scanner-wrapper').style.display = 'none';
+    document.getElementById('resetBtn').classList.remove('hidden');
 
-            let productId = decodedText;
-            let storeId = null;
+    let productId = decodedText;
+    try { const j = JSON.parse(decodedText); if (j.id) productId = j.id; } catch(e) {}
 
-            // Try to parse JSON (Standard in the new system)
-            try {
-                const json = JSON.parse(decodedText);
-                if (json.id) {
-                    productId = json.id;
-                    storeId = json.store_id || null;
-                }
-            } catch (e) {
-                // Not JSON, assume plain ID
-            }
+    try {
+        const res = await fetch('/api/products/' + encodeURIComponent(productId));
+        const product = await res.json();
 
-            // Determine Firebase Path
-            const dbPath = storeId ? `stores/${storeId}/products/${productId}` : `products/${productId}`;
+        if (product && !product.error) {
+            document.getElementById('p-name').textContent = product.name || 'Unknown Product';
+            document.getElementById('p-price').textContent = '₹' + (product.price || '0');
+            document.getElementById('p-size').textContent = product.size || 'N/A';
+            document.getElementById('p-store').textContent = product.store_name || 'Smart Retail Shopping';
+            currentProductId = productId;
+            currentStoreId = product.store_id;
 
-            // Fetch from Firebase
-            database.ref(dbPath).once("value")
-                .then((snapshot) => {
-                    const data = snapshot.val();
-                    document.getElementById("loading").style.display = "none";
+            const card = document.getElementById('productCard');
+            card.style.display = 'block';
+            requestAnimationFrame(() => requestAnimationFrame(() => card.classList.add('show')));
 
-                    if (data) {
-                        const resultContainer = document.getElementById("result-container");
-                        resultContainer.style.display = "block";
-                        resultContainer.classList.add("active");
-
-                        const stockStatus = parseInt(data.stock) > 0 ?
-                            `<span style="color: #10b981; font-weight: 600;">● In Stock (${data.stock})</span>` :
-                            `<span style="color: #ef4444; font-weight: 600;">● Out of Stock</span>`;
-
-                        document.getElementById("result-content").innerHTML = `
-                            ${data.image ? `<img src="${data.image}" style="width: 100%; height: 200px; object-fit: contain; background: #fff; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid rgba(255,255,255,0.1);">` : ''}
-                            
-                            <div style="text-align: left; margin-bottom: 1.5rem;">
-                                <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.2rem;">${data.brand || 'Generic'}</div>
-                                <h2 style="margin: 0; font-size: 1.5rem; font-weight: 700;">${data.name || 'Unknown Product'}</h2>
-                                <div style="font-size: 1.8rem; font-weight: 800; color: var(--accent); margin: 0.5rem 0;">₹${data.price || '0'}</div>
-                                ${stockStatus}
-                            </div>
-
-                            <div style="background: rgba(255,255,255,0.05); padding: 1.2rem; border-radius: 12px; text-align: left; margin-bottom: 1rem;">
-                                <div class="detail-item" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.8rem; margin-bottom: 0.8rem;">
-                                    <div class="detail-label" style="font-size: 0.75rem; color: var(--text-muted);">CATEGORY</div>
-                                    <div class="detail-value" style="font-weight: 600;">${data.category || 'General'}</div>
-                                </div>
-                                <div class="detail-item" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.8rem; margin-bottom: 0.8rem;">
-                                    <div class="detail-label" style="font-size: 0.75rem; color: var(--text-muted);">DESCRIPTION</div>
-                                    <div class="detail-value" style="font-weight: 400; line-height: 1.4;">${data.description || 'No description available.'}</div>
-                                </div>
-                                ${data.specs ? `
-                                <div class="detail-item">
-                                    <div class="detail-label" style="font-size: 0.75rem; color: var(--text-muted);">SPECIFICATIONS</div>
-                                    <div class="detail-value" style="font-weight: 400; font-size: 0.85rem; white-space: pre-line; line-height: 1.5;">${data.specs}</div>
-                                </div>` : ''}
-                            </div>
-
-                            <button onclick="addToCart('${productId}', '${storeId}')" style="width: 100%; padding: 1rem; background: var(--accent); border-radius: 10px; font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem; cursor: pointer;">Add to Cart</button>
-                        `;
-
-                        if (window.navigator.vibrate) window.navigator.vibrate(100);
-                    } else {
-                        alert("Product not found!");
-                        restartScanner();
-                    }
-                }).catch(err => {
-                    console.error(err);
-                    alert("Error fetching product details");
-                    restartScanner();
-                });
+            document.getElementById('scan-status').textContent = '';
+            if (navigator.vibrate) navigator.vibrate(80);
+        } else {
+            document.getElementById('scan-status').textContent = 'Product not found for ID: ' + productId;
         }
+    } catch(err) {
+        document.getElementById('scan-status').textContent = 'Failed to fetch product.';
+    }
+}
 
-        async function addToCart(productId, storeId) {
-            try {
-                const response = await fetch('/api/cart', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ product_id: productId, store_id: storeId, quantity: 1 })
-                });
-                const result = await response.json();
-                if (result.success) {
-                    alert("Added to cart!");
-                } else {
-                    alert("Error: " + result.error);
-                }
-            } catch (err) {
-                console.error(err);
-                alert("Failed to add to cart");
-            }
-        }
+function startScanner() {
+    html5QrCode = new Html5Qrcode('reader');
+    Html5Qrcode.getCameras().then(devices => {
+        if (!devices || !devices.length) { alert('No camera found.'); return; }
+        let camId = devices[0].id;
+        for (const d of devices) { if (d.label.toLowerCase().includes('back')) { camId = d.id; break; } }
+        html5QrCode.start(camId, { fps: 10, qrbox: { width: 230, height: 230 } }, onScanSuccess, () => {})
+            .catch(err => { console.error(err); alert('Camera access denied. Check browser permissions.'); });
+    }).catch(err => console.error('Camera enum error:', err));
+}
 
-        function restartScanner() {
-            document.getElementById("result-container").style.display = "none";
-            document.getElementById("reader").style.display = "block";
-            startScanner();
-        }
+function resetScan() {
+    scanned = false; currentProductId = null; currentStoreId = null;
+    const card = document.getElementById('productCard');
+    card.classList.remove('show');
+    setTimeout(() => { card.style.display = 'none'; }, 350);
+    document.getElementById('scanner-wrapper').style.display = 'block';
+    document.getElementById('resetBtn').classList.add('hidden');
+    document.getElementById('scan-status').textContent = '';
+    startScanner();
+}
 
-        function startScanner() {
-            html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.start(
-                { facingMode: "environment" },
-                scannerConfig,
-                onScanSuccess
-            ).catch(err => {
-                console.error("Scanner failed to start", err);
-                // Fallback for desktop or non-back camera
-                html5QrCode.start(
-                    { facingMode: "user" },
-                    scannerConfig,
-                    onScanSuccess
-                );
-            });
-        }
+async function addToCart() {
+    if (!currentProductId) return;
+    try {
+        const res = await fetch('/api/cart', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ product_id: currentProductId, store_id: currentStoreId, quantity: 1 })
+        });
+        const result = await res.json();
+        if (result.success) {
+            const btn = document.querySelector('#productCard button');
+            btn.innerHTML = '<span class="material-symbols-outlined text-base">check_circle</span> Added!';
+            btn.classList.replace('bg-primary', 'bg-green-600');
+            setTimeout(() => {
+                btn.innerHTML = '<span class="material-symbols-outlined text-base">add_shopping_cart</span> Add to Cart';
+                btn.classList.replace('bg-green-600', 'bg-primary');
+            }, 2000);
+        } else { alert(result.error || 'Login as customer to add to cart.'); }
+    } catch(e) { alert('Failed to add to cart.'); }
+}
 
-        // Start on load
-        window.addEventListener('load', startScanner);
-    </script>
-
+window.addEventListener('load', startScanner);
+</script>
 </body>
-
 </html>

@@ -1,19 +1,289 @@
-{% extends "base.html" %}
+<!-- Product Details -->
+<!DOCTYPE html>
 
-{% block title %}Product Details - Smart QR Shopping{% endblock %}
-
-{% block content %}
-<div class="container">
-    <div id="product-detail" class="product-detail-container">
-        <!-- Product details will be loaded here -->
-    </div>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&amp;family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline-variant": "#bec8d2",
+                    "surface-container-high": "#e6e8eb",
+                    "on-tertiary-fixed": "#2c1600",
+                    "primary-fixed-dim": "#89ceff",
+                    "outline": "#6e7881",
+                    "on-error-container": "#93000a",
+                    "on-surface-variant": "#3e4850",
+                    "surface-tint": "#006591",
+                    "on-tertiary-container": "#4d2b00",
+                    "surface-bright": "#f7f9fc",
+                    "background": "#f7f9fc",
+                    "on-background": "#191c1e",
+                    "error": "#ba1a1a",
+                    "on-error": "#ffffff",
+                    "on-secondary-fixed-variant": "#234b64",
+                    "surface-dim": "#d8dadd",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-variant": "#e0e3e6",
+                    "on-tertiary-fixed-variant": "#693c00",
+                    "secondary-fixed-dim": "#a5cbe9",
+                    "inverse-surface": "#2d3133",
+                    "on-primary": "#ffffff",
+                    "secondary-container": "#b8dffe",
+                    "primary": "#006591",
+                    "inverse-on-surface": "#eff1f4",
+                    "secondary": "#3c627d",
+                    "on-tertiary": "#ffffff",
+                    "inverse-primary": "#89ceff",
+                    "tertiary-container": "#de8712",
+                    "surface": "#f7f9fc",
+                    "tertiary": "#8a5100",
+                    "surface-container-highest": "#e0e3e6",
+                    "on-secondary-container": "#3d637d",
+                    "on-primary-container": "#003751",
+                    "on-secondary-fixed": "#001e2f",
+                    "tertiary-fixed": "#ffdcbd",
+                    "primary-container": "#0ea5e9",
+                    "on-secondary": "#ffffff",
+                    "on-primary-fixed": "#001e2f",
+                    "on-primary-fixed-variant": "#004c6e",
+                    "surface-container": "#eceef1",
+                    "on-surface": "#191c1e",
+                    "error-container": "#ffdad6",
+                    "tertiary-fixed-dim": "#ffb86e",
+                    "surface-container-low": "#f2f4f7",
+                    "primary-fixed": "#c9e6ff",
+                    "secondary-fixed": "#c9e6ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .editorial-shadow {
+            box-shadow: 0 20px 40px rgba(0, 55, 81, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body">
+<!-- TopNavBar Component -->
+<nav class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl w-full sticky top-0 z-50 shadow-[0_20px_40px_rgba(0,55,81,0.06)]">
+<div class="flex flex-col w-full max-w-7xl mx-auto px-6 py-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-bold tracking-tighter bg-gradient-to-r from-sky-700 to-sky-400 bg-clip-text text-transparent">Ethereal Marketplace</span>
+<div class="hidden md:flex items-center gap-1 bg-surface-container-low px-4 py-2 rounded-full w-96">
+<span class="material-symbols-outlined text-outline text-xl">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-full font-label" placeholder="Search for electronics..." type="text"/>
 </div>
-{% endblock %}
-
-{% block scripts %}
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex items-center gap-6 font-['Plus_Jakarta_Sans'] font-medium text-sm tracking-tight">
+<a class="text-slate-600 dark:text-slate-400 hover:text-sky-500 transition-all duration-300" href="#">Fashion</a>
+<a class="text-sky-700 dark:text-sky-300 border-b-2 border-sky-600 pb-1" href="#">Electronics</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-sky-500 transition-all duration-300" href="#">Home</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-sky-500 transition-all duration-300" href="#">Appliances</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-sky-500 transition-all duration-300" href="#">Beauty</a>
+</div>
+<div class="flex items-center gap-4">
+<a href="{{ url_for('cart') }}" class="material-symbols-outlined text-slate-600 hover:opacity-80 transition-all scale-95 active:scale-90" style="text-decoration:none;" data-icon="shopping_cart">shopping_cart</a>
+{% if session.user_id %}
+<a href="{{ url_for('customer_dashboard') if session.get('role') == 'customer' else url_for('store_dashboard') }}" class="px-6 py-2 rounded-full bg-primary text-on-primary text-sm font-semibold hover:opacity-90 transition-all scale-95 active:scale-90" style="text-decoration:none;">Dashboard</a>
+<a href="{{ url_for('logout') }}" class="px-6 py-2 rounded-full bg-surface-container-high text-on-surface text-sm font-semibold hover:opacity-90 transition-all scale-95 active:scale-90" style="text-decoration:none;">Logout</a>
+{% else %}
+<a href="{{ url_for('login') }}" class="bg-primary text-on-primary px-6 py-2 rounded-full font-label text-sm font-semibold hover:opacity-80 transition-all duration-300 scale-95 active:scale-90" style="text-decoration:none;">Login</a>
+{% endif %}
+</div>
+</div>
+</div>
+</div>
+<div class="bg-slate-100 dark:bg-slate-800 h-[1px] w-full"></div>
+</nav>
+<!-- Main Content: Product Details -->
+<main class="max-w-7xl mx-auto px-6 py-12">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+<!-- Left: Product Image Gallery -->
+<div class="lg:col-span-7 space-y-6">
+<div class="relative bg-surface-container-lowest rounded-[2rem] overflow-hidden editorial-shadow group">
+<img id="product-main-image" alt="Smartphone Display" class="w-full h-[600px] object-cover transition-transform duration-700 group-hover:scale-105" data-alt="close-up of a sleek modern titanium smartphone with a vibrant OLED screen displaying abstract fluid colors against a soft studio backdrop" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAD5wiDkJNAzowD63gO-YW5k64TZ7WJIBBbeUKqfULZywgU-RU5AWotlgn7OgM0wT3Nwma49nF2_3nKii6WrPZS3N2YuVLjJUMdhnOJQ749vMSGooTsedMDD1H1QowhOZyu7lkS146y7ovQLPQhPBRhzHQjixM3RwBcQ2HoeKVJnLku9dMitXtxs9frsvNMLP_8kkjE0gn6vAKK4V5jzrMpVuyB_Dm4Lpa99_hbBazuLwF50wZ3LggFdmKzdAzTt_ZuaZ5ZbpU8RMiz"/>
+<div class="absolute top-6 left-6">
+<span class="bg-primary/10 backdrop-blur-md text-primary px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest">New Arrival</span>
+</div>
+</div>
+<div class="grid grid-cols-4 gap-4">
+<div class="bg-surface-container-lowest rounded-2xl overflow-hidden cursor-pointer hover:ring-2 ring-primary transition-all p-2">
+<img alt="Side View" class="w-full h-24 object-cover rounded-lg" data-alt="side view of a premium metallic smartphone showing thin bezels and volume rockers in soft morning light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPWY060bjbdbEd3cE0RzTz-_d8Ei6FUpJhiNeoIEj1Ak_eoWv6DHsD84GPusf1RHR9m4An4E6CoWQeqYEoxxk1m2WZSngClHGZgpqf_snpfTQGizHjGLNxUIIMWUCG_w3MatunpneBJ-fwVvspYUtG5lMsj4CbLx39BJs4FQTDZ2YVdG7B0Vx1EmeSCSdYfVpE7fvzyMQHRNVWjH38EBYxdBgI11_evWlUp5HOT16lYzUaNdghlE3N1Gog8FrjDRLFw6uOo3_CPhWi"/>
+</div>
+<div class="bg-surface-container-lowest rounded-2xl overflow-hidden cursor-pointer hover:ring-2 ring-primary transition-all p-2">
+<img alt="Back View" class="w-full h-24 object-cover rounded-lg" data-alt="the back of a smartphone showing a sophisticated triple lens camera system with matte glass finish" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUvR82cXycIZ00wctoJNGGC5bGV51zoaxe5pCHzXg-DD-kN1b1yJwU9u0Q8arq1D2S7IIjOR9G13DJdmNJxrrdzIjmDzhEphi6NBeo3_3tz_yiPnqLJH4zKDDpFBpipJYzZr2lqfiBc0ocUKDUj66j2G4teh-fthVNTXaPODThzbXADE6XcRWi4E2Fi9MFiBO_ifII-8RSq002LIApoEhIE9oD8AJI9EdjN2UGHHpoBz4JoDTG1GyuRRjEf8iuibNh-pk57DnHS0lg"/>
+</div>
+<div class="bg-surface-container-lowest rounded-2xl overflow-hidden cursor-pointer hover:ring-2 ring-primary transition-all p-2">
+<img alt="Detail View" class="w-full h-24 object-cover rounded-lg" data-alt="macro photograph of charging port and speakers of a high-end electronic device with precision engineering details" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfuAhIoghEzwmJqHukyDFTp6SmcBhhlrVWnXWxQN91A_vB1yZgMYkK6VqK4SIAxiEOjEv3TnxnqMtAFYckPEzHD6VuHALh7Do8JH5rpyTitUbzFTbhhwGcx8geQNTITbtSeD7VF-MM1kpYFBOZangP--33T_V3F9MM1nM3ZGDC46tf5kL8XIkmEl4avgG-C2Nq3_YfBaiyjftcmNzzGE54WwMMYkS9TFpBG4by_IYnMbDyVQ8u2MPWO87cfHiOPZ689AI--mwU9sW-"/>
+</div>
+<div class="bg-surface-container-lowest rounded-2xl overflow-hidden cursor-pointer hover:ring-2 ring-primary transition-all p-2 flex items-center justify-center bg-surface-container">
+<span class="text-primary font-bold text-sm">+5 More</span>
+</div>
+</div>
+</div>
+<!-- Right: Product Details -->
+<div class="lg:col-span-5 flex flex-col">
+<div class="sticky top-24">
+<nav class="flex items-center gap-2 text-xs text-outline mb-6 font-label">
+<a class="hover:text-primary transition-colors" href="#">Electronics</a>
+<span class="material-symbols-outlined text-[10px]">chevron_right</span>
+<a class="hover:text-primary transition-colors" href="#">Smartphones</a>
+<span class="material-symbols-outlined text-[10px]">chevron_right</span>
+<span id="product-name-nav" class="text-on-surface">Ethereal Pro X</span>
+</nav>
+<h1 id="product-title" class="text-4xl md:text-5xl font-headline font-bold text-on-surface tracking-tight leading-tight mb-4">
+                        Ethereal Pro X 
+                        <span class="block text-2xl font-medium text-outline mt-1 italic"></span>
+</h1>
+<div class="flex items-center gap-4 mb-8">
+<div class="flex items-center gap-0.5 text-tertiary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">star_half</span>
+</div>
+<span class="text-sm font-label text-outline">(4.8 • 1,240 Reviews)</span>
+</div>
+<div class="mb-10 p-6 bg-surface-container-low rounded-3xl">
+<div class="flex items-baseline gap-2">
+<span id="product-price" class="text-4xl font-headline font-extrabold text-on-surface">$1,099.00</span>
+<span class="text-lg text-outline line-through" style="display:none;"></span>
+</div>
+<p id="product-stock" class="text-primary font-semibold text-sm mt-2">Save $200.00 today with our Seasonal Launch offer.</p>
+</div>
+<div class="space-y-10">
+<!-- Selection: Color -->
+<div>
+<h3 class="font-headline font-bold text-on-surface mb-4">Finish: <span class="text-outline font-medium">Cosmic Cobalt</span></h3>
+<div class="flex gap-4">
+<button class="w-12 h-12 rounded-full bg-slate-900 border-4 border-white shadow-lg ring-2 ring-primary"></button>
+<button class="w-12 h-12 rounded-full bg-slate-200 border-4 border-white shadow-md hover:ring-2 ring-outline-variant transition-all"></button>
+<button class="w-12 h-12 rounded-full bg-sky-900 border-4 border-white shadow-md hover:ring-2 ring-outline-variant transition-all"></button>
+<button class="w-12 h-12 rounded-full bg-rose-200 border-4 border-white shadow-md hover:ring-2 ring-outline-variant transition-all"></button>
+</div>
+</div>
+<!-- Selection: Storage -->
+<div>
+<h3 class="font-headline font-bold text-on-surface mb-4">Storage Capacity</h3>
+<div class="grid grid-cols-3 gap-3">
+<button class="py-4 rounded-2xl bg-surface-container-lowest border-2 border-primary text-primary font-bold text-sm">256 GB</button>
+<button class="py-4 rounded-2xl bg-surface-container-lowest border-2 border-transparent text-on-surface hover:bg-surface-container transition-all font-bold text-sm">512 GB</button>
+<button class="py-4 rounded-2xl bg-surface-container-lowest border-2 border-transparent text-on-surface hover:bg-surface-container transition-all font-bold text-sm">1 TB</button>
+</div>
+</div>
+<!-- Description -->
+<div id="product-description-container">
+<h3 class="font-headline font-bold text-on-surface mb-3">Refined Experience</h3>
+<p id="product-description" class="text-on-surface-variant leading-relaxed font-body text-sm">
+                                Experience the pinnacle of mobile innovation. Featuring the new A18 Bionic architecture and an ethereal titanium chassis, the Pro X delivers unmatched performance while remaining impossibly light.
+                            </p>
+<div class="qr-code-section mt-4 hidden" id="qr-code-section">
+    <p class="font-bold text-sm mb-2">Scan to Store</p>
+    <img id="product-qr-code" src="" alt="Product QR Code" class="w-32 h-32 border border-outline-variant p-2 rounded-xl">
+</div>
+</div>
+<!-- Actions -->
+<div class="grid grid-cols-2 gap-4">
+<button onclick="addToCart()" class="bg-gradient-to-br from-primary to-primary-container text-white font-bold py-5 rounded-full editorial-shadow scale-[1.02] hover:scale-[1.04] active:scale-95 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-xl">shopping_cart</span>
+                                Add to Cart
+                            </button>
+<button onclick="buyNow()" class="bg-tertiary-container text-on-tertiary-container font-bold py-5 rounded-full hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-tertiary-container/20">
+                                Buy Now
+                            </button>
+</div>
+<!-- Trust Signals -->
+<div class="grid grid-cols-2 gap-4 pt-6">
+<div class="flex items-start gap-3 p-4 bg-surface-container-lowest rounded-2xl">
+<span class="material-symbols-outlined text-primary">local_shipping</span>
+<div>
+<p class="text-xs font-bold text-on-surface">Free Delivery</p>
+<p class="text-[10px] text-outline">Arriving by Thursday</p>
+</div>
+</div>
+<div class="flex items-start gap-3 p-4 bg-surface-container-lowest rounded-2xl">
+<span class="material-symbols-outlined text-primary">verified_user</span>
+<div>
+<p class="text-xs font-bold text-on-surface">30-Day Return</p>
+<p class="text-[10px] text-outline">Hassle-free guarantee</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer Component -->
+<footer class="bg-slate-50 dark:bg-slate-950 border-t border-slate-200/50 dark:border-slate-800/50 mt-24">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-8 px-8 py-12 max-w-7xl mx-auto">
+<div class="col-span-2 md:col-span-1">
+<span class="text-lg font-bold text-slate-900 dark:text-white block mb-4">Ethereal</span>
+<p class="text-slate-500 text-sm leading-relaxed mb-6 max-w-xs font-['Inter']">
+                    Elevating the digital marketplace into an atmospheric journey of discovery and premium craft.
+                </p>
+</div>
+<div class="flex flex-col gap-3">
+<h4 class="font-bold text-slate-900 dark:text-white text-sm mb-2">Shop</h4>
+<a class="text-slate-500 dark:text-slate-400 text-sm hover:text-sky-500 transition-colors" href="#">Smartphones</a>
+<a class="text-slate-500 dark:text-slate-400 text-sm hover:text-sky-500 transition-colors" href="#">Laptops</a>
+<a class="text-slate-500 dark:text-slate-400 text-sm hover:text-sky-500 transition-colors" href="#">Accessories</a>
+</div>
+<div class="flex flex-col gap-3">
+<h4 class="font-bold text-slate-900 dark:text-white text-sm mb-2">Company</h4>
+<a class="text-slate-500 dark:text-slate-400 text-sm hover:text-sky-500 transition-colors" href="#">About Us</a>
+<a class="text-slate-500 dark:text-slate-400 text-sm hover:text-sky-500 transition-colors" href="#">Contact Us</a>
+<a class="text-slate-500 dark:text-slate-400 text-sm hover:text-sky-500 transition-colors" href="#">Careers</a>
+<a class="text-slate-500 dark:text-slate-400 text-sm hover:text-sky-500 transition-colors" href="#">Press</a>
+</div>
+<div class="flex flex-col gap-3">
+<h4 class="font-bold text-slate-900 dark:text-white text-sm mb-2">Legal</h4>
+<a class="text-slate-500 dark:text-slate-400 text-sm hover:text-sky-500 transition-colors" href="#">Privacy Policy</a>
+<a class="text-slate-500 dark:text-slate-400 text-sm hover:text-sky-500 transition-colors" href="#">Terms of Use</a>
+</div>
+</div>
+<div class="max-w-7xl mx-auto px-8 py-6 border-t border-slate-200/30">
+<p class="text-center md:text-left text-slate-400 text-xs font-['Inter']">
+                © 2024 Ethereal Marketplace. The Curated Atmosphere.
+            </p>
+</div>
+</footer>
 <script>
     const storeId = "{{ store_id }}";
     const productId = "{{ product_id }}";
+    
+    function buyNow() {
+        addToCart().then(() => {
+            window.location.href = "{{ url_for('cart') }}";
+        });
+    }
 </script>
 <script src="{{ url_for('static', filename='js/product.js') }}"></script>
-{% endblock %}
+<script src="/static/js/buttons.js"></script>
+</body></html>

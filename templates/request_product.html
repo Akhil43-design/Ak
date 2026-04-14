@@ -1,100 +1,95 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Request Product | Smart Retail Shopping</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { primary: '#2e7d32', secondary: '#ef6c00', surface: '#fbfaf8' }, fontFamily: { sans: ['Poppins','sans-serif'] } } }
+        }
+    </script>
+    <style>.material-symbols-outlined { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }</style>
+</head>
+<body class="bg-surface font-sans min-h-screen">
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-xl mx-auto px-4 h-14 flex items-center justify-between">
+            <button onclick="window.history.back()" class="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center text-gray-600">
+                <span class="material-symbols-outlined text-xl">arrow_back</span>
+            </button>
+            <span class="font-bold text-primary">Request Product</span>
+            <div class="w-9"></div>
+        </div>
+    </nav>
 
-{% block title %}Request Product - Smart QR Shopping{% endblock %}
-
-{% block content %}
-<div class="container">
-    <div class="page-header">
-        <h1>Request a Product</h1>
-        <p>Can't find what you're looking for? Let the store know!</p>
-    </div>
-
-    <div class="card">
-        <form onsubmit="handleProductRequest(event)">
-            <div id="store-selection-group" class="form-group" style="display: none;">
-                <label>Select Store</label>
-                <select id="request-store-id" class="form-control"
-                    style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd;">
-                    <option value="">-- Choose a Store --</option>
-                </select>
+    <main class="max-w-xl mx-auto px-4 py-8">
+        <div class="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+            <div class="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center text-primary mb-6">
+                <span class="material-symbols-outlined text-3xl">contact_support</span>
             </div>
-            <div class="form-group">
-                <label>Product Name</label>
-                <input type="text" id="request-product-name" required placeholder="What product would you like?">
-            </div>
-            <div class="form-group">
-                <label>Additional Details (Optional)</label>
-                <textarea id="request-details" rows="3"
-                    placeholder="Any specific requirements or details..."></textarea>
-            </div>
-            <button type="submit" class="btn-primary">Submit Request</button>
-        </form>
-    </div>
-</div>
-{% endblock %}
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Can't find it?</h2>
+            <p class="text-gray-500 text-sm mb-8 leading-relaxed">Let the store owner know what village-sourced products you're looking for. We'll try to stock it for your next visit!</p>
+            
+            <form id="requestForm" class="space-y-6">
+                <div id="form-msg" class="hidden p-4 rounded-xl text-sm font-bold text-center"></div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Product Name</label>
+                    <input type="text" id="product-name" required placeholder="e.g. Handmade Terracotta Pots"
+                           class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"/>
+                </div>
 
-{% block scripts %}
-<script>
-    let storeId = "{{ store_id or '' }}";
+                <div class="bg-orange-50 rounded-2xl p-4 border border-orange-100">
+                    <p class="text-[10px] text-secondary font-bold uppercase tracking-wider mb-1">Impact Tip</p>
+                    <p class="text-xs text-secondary leading-relaxed">Requesting traditional products helps local artisans get more visibility!</p>
+                </div>
 
-    document.addEventListener('DOMContentLoaded', async () => {
-        const storeGroup = document.getElementById('store-selection-group');
-        const storeSelect = document.getElementById('request-store-id');
+                <button type="submit" id="submit-btn" class="w-full py-4 bg-primary hover:bg-green-800 text-white font-bold rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-xl">send</span> Submit Request
+                </button>
+            </form>
+        </div>
+    </main>
 
-        if (!storeId) {
-            // Fetch stores to allow selection
+    <script>
+        const storeId = "{{ store_id }}";
+        const form = document.getElementById('requestForm');
+        const msg = document.getElementById('form-msg');
+        const btn = document.getElementById('submit-btn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const productName = document.getElementById('product-name').value.trim();
+            if (!productName) return;
+
+            btn.disabled = true;
+            btn.innerHTML = `<span class="animate-spin material-symbols-outlined">progress_activity</span> Sending...`;
+
             try {
-                const response = await fetch('/api/stores');
-                const stores = await response.json();
-
-                Object.entries(stores).forEach(([id, store]) => {
-                    const opt = document.createElement('option');
-                    opt.value = id;
-                    opt.textContent = store.name;
-                    storeSelect.appendChild(opt);
+                const res = await fetch(`/api/stores/${storeId}/requests`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_name: productName })
                 });
-
-                storeGroup.style.display = 'block';
-            } catch (error) {
-                console.error('Error loading stores:', error);
+                
+                if (res.ok) {
+                    msg.textContent = "Success! Your request has been sent to the store owner.";
+                    msg.className = "p-4 rounded-xl text-sm font-bold text-center bg-green-50 text-green-700 block";
+                    form.reset();
+                } else {
+                    throw new Error();
+                }
+            } catch (e) {
+                msg.textContent = "Oops! Something went wrong. Please try again.";
+                msg.className = "p-4 rounded-xl text-sm font-bold text-center bg-red-50 text-red-700 block";
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<span class="material-symbols-outlined text-xl">send</span> Submit Request`;
             }
-        }
-    });
-
-    async function handleProductRequest(event) {
-        event.preventDefault();
-
-        const selectedStoreId = storeId || document.getElementById('request-store-id').value;
-        const productName = document.getElementById('request-product-name').value;
-
-        if (!selectedStoreId) {
-            alert('Please select a store');
-            return;
-        }
-
-        try {
-            const response = await fetch('/api/requests', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    store_id: selectedStoreId,
-                    product_name: productName
-                })
-            });
-
-            if (response.ok) {
-                alert('Product request submitted successfully!');
-                window.location.href = '/customer/dashboard';
-            } else {
-                const err = await response.json();
-                alert('Failed to submit request: ' + (err.error || 'Unknown error'));
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('An error occurred');
-        }
-    }
-</script>
-{% endblock %}
+        });
+    </script>
+</body>
+</html>

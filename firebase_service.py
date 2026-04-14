@@ -41,12 +41,14 @@ class FirebaseService:
         response = requests.get(url)
         users = response.json()
         
-        if not users:
+        if not users or not isinstance(users, dict):
             return None
             
         for user_id, user_data in users.items():
+            # Skip non-dict entries (e.g. metadata strings)
+            if not isinstance(user_data, dict):
+                continue
             if user_data.get('email') == email:
-                # Inject user_id
                 user_data['user_id'] = user_id
                 return user_data
         
@@ -110,10 +112,14 @@ class FirebaseService:
         Returns (store_id, product_data) or (None, None)
         """
         all_stores = self.get_all_stores()
-        if not all_stores: return None, None
+        if not all_stores or not isinstance(all_stores, dict): return None, None
         
         for store_id, store_data in all_stores.items():
+            if not isinstance(store_data, dict):
+                continue
             products = store_data.get('products', {})
+            if not isinstance(products, dict):
+                continue
             if product_id in products:
                 # Found it!
                 return store_id, products[product_id]
@@ -253,6 +259,8 @@ class FirebaseService:
         # Calculate most scanned products
         scanned_products = []
         for prod_id, prod_data in products.items():
+            if not isinstance(prod_data, dict):
+                continue
             scan_count = prod_data.get('scan_count', 0)
             if scan_count > 0:
                 scanned_products.append({
@@ -266,8 +274,10 @@ class FirebaseService:
         requests_data = self.get_store_requests(store_id)
         requested_products = []
         
-        if requests_data:
+        if requests_data and isinstance(requests_data, dict):
             for prod_name, data in requests_data.items():
+                if not isinstance(data, dict):
+                    continue
                 requested_products.append({
                     'name': prod_name,
                     'count': data.get('count', 0)

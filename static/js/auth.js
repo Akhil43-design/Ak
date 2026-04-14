@@ -102,5 +102,7 @@ async function handleRegister(event) {
 function showMessage(message, type) {
     const messageDiv = document.getElementById('message');
     messageDiv.textContent = message;
-    messageDiv.className = `message ${type}`;
+    if (type === 'error') {
+        messageDiv.classList.add('text-red-500');
+    }
 }
