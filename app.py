@@ -460,18 +460,16 @@ def cart_api():
         product_id = data.get('product_id')
         store_id = data.get('store_id')
         
-        # If product name or price is missing, fetch them from Firebase
-        product_name = data.get('product_name')
-        price = data.get('price')
-        image = data.get('image')
-        
-        if (not product_name or price is None) and store_id:
-            product = firebase.get_product(store_id, product_id)
-            if product and 'error' not in product:
-                product_name = product.get('name', 'Product')
-                price = product.get('price', 0)
-                image = product.get('image', '')
-        
+        if (not product_name or price is None) and not store_id:
+            # Partial update (e.g. from +/- buttons in cart)
+            # Use PATCH to only update quantity without destroying metadata
+            firebase.update_cart_item(user_id, product_id, {
+                'quantity': data.get('quantity', 1),
+                'updated_at': datetime.now().isoformat()
+            })
+            return jsonify({'success': True})
+
+        # Full add/replace
         cart_item = {
             'store_id': store_id,
             'product_name': product_name,

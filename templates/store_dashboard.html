@@ -118,31 +118,35 @@
         <div class="space-y-6">
             <!-- Recent Orders Panel -->
             <div class="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100 p-5 sm:p-6 text-left">
-                <h3 class="text-base font-bold mb-1 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-blue-500">shopping_bag</span> Recent Orders
-                </h3>
+                <div class="flex items-center justify-between mb-1">
+                    <h3 class="text-base font-bold flex items-center gap-2">
+                        <span class="material-symbols-outlined text-blue-500">shopping_bag</span> Recent Orders
+                    </h3>
+                    <button onclick="loadOrders()" class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-blue-50 hover:text-blue-500 transition-all">
+                        <span class="material-symbols-outlined text-lg">sync</span>
+                    </button>
+                </div>
                 <p class="text-[10px] text-gray-400 mb-4 uppercase tracking-wider font-bold">New sales from your store</p>
                 
                 <div id="orders-container" class="space-y-3">
-                    <div class="text-center py-6 text-gray-300">
-                        <span class="material-symbols-outlined text-3xl block mb-2 animate-pulse">sync</span>
-                        <p class="text-xs italic">Syncing orders...</p>
-                    </div>
+                    <!-- Loaded via JS -->
                 </div>
             </div>
 
             <!-- Customer Requests Panel -->
             <div class="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100 p-5 sm:p-6 text-left">
-                <h3 class="text-base font-bold mb-1 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary">contact_support</span> Customer Requests
-                </h3>
+                <div class="flex items-center justify-between mb-1">
+                    <h3 class="text-base font-bold flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">contact_support</span> Customer Requests
+                    </h3>
+                    <button onclick="loadRequests()" class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-green-50 hover:text-primary transition-all">
+                        <span class="material-symbols-outlined text-lg">sync</span>
+                    </button>
+                </div>
                 <p class="text-[10px] text-gray-400 mb-4 uppercase tracking-wider font-bold">What your customers want</p>
                 
                 <div id="requests-container" class="space-y-3">
-                    <div class="text-center py-6 text-gray-300">
-                        <span class="material-symbols-outlined text-3xl block mb-2 animate-pulse">hourglass_top</span>
-                        <p class="text-xs italic">Loading requests...</p>
-                    </div>
+                    <!-- Loaded via JS -->
                 </div>
             </div>
 

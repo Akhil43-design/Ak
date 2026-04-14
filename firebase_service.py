@@ -129,9 +129,15 @@ class FirebaseService:
     # ========== CART OPERATIONS ==========
     
     def add_to_cart(self, user_id, product_id, product_data):
-        """Add item to user's cart"""
+        """Add or completely replace item in user's cart"""
         url = self._get_url(f"users/{user_id}/cart/{product_id}")
         response = requests.put(url, json=product_data)
+        return response.json()
+    
+    def update_cart_item(self, user_id, product_id, product_data):
+        """Partially update (merge) item in user's cart (e.g. just quantity)"""
+        url = self._get_url(f"users/{user_id}/cart/{product_id}")
+        response = requests.patch(url, json=product_data)
         return response.json()
     
     def get_cart(self, user_id):
