@@ -1,14 +1,14 @@
 // Customer Dashboard JavaScript
 
-// Load stores on page load
-if (window.location.pathname === '/customer/dashboard') {
-    loadStores();
-}
-
-// Load scanned history
-if (window.location.pathname === '/history') {
-    loadHistory();
-}
+// Initialize dashboard features
+document.addEventListener('DOMContentLoaded', () => {
+    const path = window.location.pathname;
+    if (path === '/customer/dashboard') {
+        loadStores();
+    } else if (path === '/history') {
+        loadHistory();
+    }
+});
 
 async function loadStores() {
     try {
@@ -44,7 +44,7 @@ function renderStores(stores) {
         
         card.innerHTML = `
             <div class="h-32 w-full overflow-hidden">
-                <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src="${storeImageUrl}"/>
+                <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src="${storeImageUrl}" loading="lazy"/>
             </div>
             <div class="p-6 pt-0 mt-[-24px] relative">
                 <div class="w-16 h-16 rounded-2xl bg-white p-1 ethereal-shadow mb-3 flex items-center justify-center text-primary font-bold text-2xl">
@@ -121,19 +121,8 @@ let currentProduct = null;
 let soundEnabled = true;
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Check if library is loaded, if not, load it dynamically
-    if (typeof Html5Qrcode === 'undefined') {
-        console.warn("Html5Qrcode not found, loading dynamically...");
-        const script = document.createElement('script');
-        script.src = "https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js";
-        script.onload = () => {
-            console.log("Html5Qrcode loaded dynamically.");
-            // Re-bind buttons if needed or just let user click again
-        };
-        script.onerror = () => {
-            alert("Failed to load QR Scanner library. Please check internet connection.");
-        };
-        document.head.appendChild(script);
+    if (typeof Html5Qrcode === 'undefined' && document.getElementById('qr-reader')) {
+        console.error("Html5Qrcode library not found. QR scanning will not work.");
     }
 });
 
@@ -231,7 +220,6 @@ function onScanFailure(error) {
 }
 
 function handleScannedData(data) {
-    console.log("Scanned:", data);
 
     let storeId, productId;
 
@@ -264,9 +252,6 @@ function handleScannedData(data) {
         fetchProductDetails(storeId, productId);
     } else {
         // 3. Assume Plain ID (Static QR Mode or Legacy Barcode)
-        // If it's not JSON and not a URL, it might be a direct ID.
-        // We force this path for EVERYTHING else.
-        console.log("Assuming Plain ID scan:", data);
         fetchProductByGlobalId(data);
     }
 }

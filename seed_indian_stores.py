@@ -8,69 +8,129 @@ from qr_generator import QRGenerator
 # India-Specific Data
 INDIAN_STORES = [
     {
-        "name": "Sharma Electronics",
-        "category": "Electronics",
-        "description": "Best deals on smartphones, laptops, and accessories. Located in Nehru Place.",
+        "name": "Krishna Dairy",
+        "category": "Dairy",
+        "description": "Pure and fresh dairy products including milk, curd, and paneer delivered daily.",
         "products": [
-            {"name": "OnePlus Nord CE 3", "price": 24999, "image": "https://m.media-amazon.com/images/I/6175SlKKECL._SX679_.jpg", "stock": 15},
-            {"name": "Samsung Galaxy Tab S9", "price": 69999, "image": "https://m.media-amazon.com/images/I/61fK9Vn+ZIL._SX679_.jpg", "stock": 8},
-            {"name": "boAt Rockerz 450", "price": 1499, "image": "https://m.media-amazon.com/images/I/51xxA+6E+xL._SX679_.jpg", "stock": 50},
-            {"name": "Dell Inspiron 15 Laptop", "price": 45000, "image": "https://m.media-amazon.com/images/I/51jF8d7sC+L._SX679_.jpg", "stock": 5},
-            {"name": "Mi Power Bank 3i", "price": 1999, "image": "https://m.media-amazon.com/images/I/71lVwl3q-kL._SX679_.jpg", "stock": 30}
+            {"name": "Full Cream Milk (1L)", "price": 66, "image": "https://m.media-amazon.com/images/I/61S6BndK8oL._SX679_.jpg", "stock": 100},
+            {"name": "Fresh Paneer (200g)", "price": 85, "image": "https://m.media-amazon.com/images/I/41-l8r2XmJL.jpg", "stock": 40},
+            {"name": "Artisan Curd (500g)", "price": 45, "image": "https://m.media-amazon.com/images/I/71YyPOnI0FL._SX679_.jpg", "stock": 60},
+            {"name": "Pure Cow Ghee (1L)", "price": 650, "image": "https://m.media-amazon.com/images/I/61rStOofw1L._SX679_.jpg", "stock": 20},
+            {"name": "Fresh Butter (100g)", "price": 55, "image": "https://m.media-amazon.com/images/I/61v4DqE3j1L._SX679_.jpg", "stock": 50}
         ]
     },
     {
-        "name": "Priya Fashions",
+        "name": "Sai Mobile Center",
+        "category": "Electronics",
+        "description": "Latest smartphones, mobile accessories, and expert repair services.",
+        "products": [
+            {"name": "Redmi Note 12", "price": 14999, "image": "https://m.media-amazon.com/images/I/71VW8Lm7SLL._SX679_.jpg", "stock": 15},
+            {"name": "Fast Charger 33W", "price": 999, "image": "https://m.media-amazon.com/images/I/51-mYjS9vTL._SX679_.jpg", "stock": 30},
+            {"name": "Bluetooth Neckband", "price": 1299, "image": "https://m.media-amazon.com/images/I/51S2n9H9fRL._SX679_.jpg", "stock": 25},
+            {"name": "Tempered Glass", "price": 199, "image": "https://m.media-amazon.com/images/I/71uKqYyYQ7L._SX679_.jpg", "stock": 100},
+            {"name": "Silicon Back Cover", "price": 299, "image": "https://m.media-amazon.com/images/I/61mQ-vYvQJL._SX679_.jpg", "stock": 50}
+        ]
+    },
+    {
+        "name": "Laxmi Vegetable Stall",
+        "category": "Groceries",
+        "description": "Farm-fresh organic vegetables and seasonal fruits at wholesale prices.",
+        "products": [
+            {"name": "Organic Potatoes (1kg)", "price": 40, "image": "https://m.media-amazon.com/images/I/313dtY-8beL.jpg", "stock": 200},
+            {"name": "Fresh Tomatoes (1kg)", "price": 60, "image": "https://m.media-amazon.com/images/I/519Y9pY9yHL.jpg", "stock": 150},
+            {"name": "Green Onions (250g)", "price": 30, "image": "https://m.media-amazon.com/images/I/41-y-y-y-yL.jpg", "stock": 80},
+            {"name": "Fresh Spinach (Bunch)", "price": 25, "image": "https://m.media-amazon.com/images/I/41-s-s-s-sL.jpg", "stock": 100},
+            {"name": "Cauliflower (Piece)", "price": 45, "image": "https://m.media-amazon.com/images/I/41-c-c-c-cL.jpg", "stock": 50}
+        ]
+    },
+    {
+        "name": "Sharma Electronics",
+        "category": "Electronics",
+        "description": "Trusted shop for home appliances, CPUs, and electrical fittings.",
+        "products": [
+            {"name": "Bajaj Iron", "price": 850, "image": "https://m.media-amazon.com/images/I/61lDlLdLdLL._SX679_.jpg", "stock": 12},
+            {"name": "Usha Table Fan", "price": 2200, "image": "https://m.media-amazon.com/images/I/61fFfFfFfFL._SX679_.jpg", "stock": 8},
+            {"name": "Havells LED Bulb 9W", "price": 99, "image": "https://m.media-amazon.com/images/I/51bBbBbBbBL._SX679_.jpg", "stock": 100},
+            {"name": "Extension Cord 5m", "price": 450, "image": "https://m.media-amazon.com/images/I/61eEeEeEeEL._SX679_.jpg", "stock": 30},
+            {"name": "Electric Kettle 1.5L", "price": 1200, "image": "https://m.media-amazon.com/images/I/61kKkKkKkKL._SX679_.jpg", "stock": 15}
+        ]
+    },
+    {
+        "name": "Priya Fashion Hub",
         "category": "Fashion",
-        "description": "Trending ethnic and western wear for women. Visit us for the latest collection.",
+        "description": "Beautiful ethnic wear, sarees, and party dresses for every occasion.",
         "products": [
             {"name": "Cotton Kurti Set", "price": 1299, "image": "https://m.media-amazon.com/images/I/61K-Kk6mKPL._UY741_.jpg", "stock": 25},
-            {"name": "Silk Saree (Kanjivaram)", "price": 4500, "image": "https://m.media-amazon.com/images/I/91JmOqf+bAL._UY879_.jpg", "stock": 10},
-            {"name": "Denim Jeans", "price": 1899, "image": "https://m.media-amazon.com/images/I/81+wF7Y5LlL._UY741_.jpg", "stock": 40},
-            {"name": "Designer Lehenga", "price": 12000, "image": "https://m.media-amazon.com/images/I/71K2+p7g+tL._UY879_.jpg", "stock": 3},
+            {"name": "Silk Saree", "price": 4500, "image": "https://m.media-amazon.com/images/I/91JmOqf+bAL._UY879_.jpg", "stock": 10},
+            {"name": "Designer Dupatta", "price": 499, "image": "https://m.media-amazon.com/images/I/71D-D-D-DPL._UY879_.jpg", "stock": 40},
+            {"name": "Ethnic Earrings", "price": 250, "image": "https://m.media-amazon.com/images/I/61e-e-e-eEL._UY879_.jpg", "stock": 60},
             {"name": "Party Wear Gown", "price": 3500, "image": "https://m.media-amazon.com/images/I/61v+5q6s+pL._UY741_.jpg", "stock": 12}
         ]
     },
     {
-        "name": "Singh Grocery Mart",
-        "category": "Groceries",
-        "description": "Daily fresh vegetables, fruits, and household essentials. Free home delivery.",
+        "name": "Bikaneri Sweets",
+        "category": "Food",
+        "description": "Authentic Indian sweets, snacks, and fresh namkeen since 1995.",
         "products": [
-            {"name": "Basmati Rice (5kg)", "price": 650, "image": "https://m.media-amazon.com/images/I/71h+hC+m+aL._SX679_.jpg", "stock": 100},
-            {"name": "Tata Tea Gold (500g)", "price": 280, "image": "https://m.media-amazon.com/images/I/61+9f+k+k+L._SX679_.jpg", "stock": 60},
-            {"name": "Amul Butter (500g)", "price": 275, "image": "https://m.media-amazon.com/images/I/61+rJ+n+n+L._SX679_.jpg", "stock": 40},
-            {"name": "Aashirvaad Atta (10kg)", "price": 450, "image": "https://m.media-amazon.com/images/I/81+w+w+w+wL._SX679_.jpg", "stock": 80},
-            {"name": "Sunflower Oil (1L)", "price": 160, "image": "https://m.media-amazon.com/images/I/61+y+y+y+yL._SX679_.jpg", "stock": 50}
+            {"name": "Gulab Jamun (1kg)", "price": 450, "image": "https://m.media-amazon.com/images/I/71sSsSsSsSL.jpg", "stock": 30},
+            {"name": "Kaju Katli (500g)", "price": 600, "image": "https://m.media-amazon.com/images/I/61kKkKkKkKL.jpg", "stock": 20},
+            {"name": "Mixed Namkeen (1kg)", "price": 280, "image": "https://m.media-amazon.com/images/I/81nNnNnNnNL.jpg", "stock": 40},
+            {"name": "Special Samosa (10pc)", "price": 150, "image": "https://m.media-amazon.com/images/I/61samOsaL.jpg", "stock": 100},
+            {"name": "Fresh Jalebi (500g)", "price": 120, "image": "https://m.media-amazon.com/images/I/71jJjJjJjJL.jpg", "stock": 50}
         ]
     },
     {
-        "name": "Raju Home Decor",
-        "category": "Home & Garden",
-        "description": "Beautify your home with our exclusive collection of decor items.",
+        "name": "National Pharmacy",
+        "category": "Healthcare",
+        "description": "Essential medicines, baby care products, and wellness supplements.",
         "products": [
-            {"name": "Ceramic Flower Vase", "price": 899, "image": "https://m.media-amazon.com/images/I/71+v+v+v+vL._SX679_.jpg", "stock": 15},
-            {"name": "Wall Painting (Abstract)", "price": 2500, "image": "https://m.media-amazon.com/images/I/81+z+z+z+zL._SX679_.jpg", "stock": 5},
-            {"name": "Cotton Bedsheet (King Size)", "price": 1499, "image": "https://m.media-amazon.com/images/I/71+x+x+x+xL._SX679_.jpg", "stock": 30},
-            {"name": "Table Lamp", "price": 1200, "image": "https://m.media-amazon.com/images/I/61+u+u+u+uL._SX679_.jpg", "stock": 10},
-            {"name": "Indoor Plant (Snake Plant)", "price": 450, "image": "https://m.media-amazon.com/images/I/61+t+t+t+tL._SX679_.jpg", "stock": 20}
+            {"name": "Paracetamol 500mg", "price": 20, "image": "https://m.media-amazon.com/images/I/51pPpPpPpPL.jpg", "stock": 500},
+            {"name": "Multivitamin Tablets", "price": 350, "image": "https://m.media-amazon.com/images/I/61mVvVvVvVL.jpg", "stock": 50},
+            {"name": "Dettol Antiseptic", "price": 180, "image": "https://m.media-amazon.com/images/I/61dAaAaAaAL.jpg", "stock": 100},
+            {"name": "Digital Thermometer", "price": 250, "image": "https://m.media-amazon.com/images/I/51tTtTtTtTL.jpg", "stock": 30},
+            {"name": "Baby Diapers (S)", "price": 899, "image": "https://m.media-amazon.com/images/I/71dDdDdDdDL.jpg", "stock": 40}
         ]
     },
     {
-        "name": "Tech World",
-        "category": "Electronics",
-        "description": "Your one-stop shop for all gaming accessories and computer peripherals.",
+        "name": "Royal Bakery",
+        "category": "Food",
+        "description": "Freshly baked cakes, cookies, and breads for your daily breakfast.",
         "products": [
-            {"name": "Logitech G102 Mouse", "price": 1495, "image": "https://m.media-amazon.com/images/I/61+s+s+s+sL._SX679_.jpg", "stock": 25},
-            {"name": "Mechanical Keyboard", "price": 3500, "image": "https://m.media-amazon.com/images/I/71+r+r+r+rL._SX679_.jpg", "stock": 10},
-            {"name": "Gaming Headset", "price": 2200, "image": "https://m.media-amazon.com/images/I/61+q+q+q+qL._SX679_.jpg", "stock": 15},
-            {"name": "Mouse Pad (Extended)", "price": 499, "image": "https://m.media-amazon.com/images/I/61+p+p+p+pL._SX679_.jpg", "stock": 50},
-            {"name": "HDMI Cable (2m)", "price": 299, "image": "https://m.media-amazon.com/images/I/51+n+n+n+nL._SX679_.jpg", "stock": 60}
+            {"name": "Atta Cookies (500g)", "price": 180, "image": "https://m.media-amazon.com/images/I/61cCcCcCccL.jpg", "stock": 25},
+            {"name": "Fruit Cake (450g)", "price": 250, "image": "https://m.media-amazon.com/images/I/71fFfFfFfFL.jpg", "stock": 15},
+            {"name": "Milk Bread (Large)", "price": 45, "image": "https://m.media-amazon.com/images/I/51bBbBbBbBL.jpg", "stock": 40},
+            {"name": "Chocolate Brownie", "price": 65, "image": "https://m.media-amazon.com/images/I/61chocOL.jpg", "stock": 30},
+            {"name": "Bun Mask (Pair)", "price": 30, "image": "https://m.media-amazon.com/images/I/51bunL.jpg", "stock": 50}
+        ]
+    },
+    {
+        "name": "Apex Hardware",
+        "category": "Hardware",
+        "description": "Quality tools, paints, and plumbing fixtures for home improvement.",
+        "products": [
+            {"name": "Hammer & Tool Set", "price": 1250, "image": "https://m.media-amazon.com/images/I/71hHhHhHhHL.jpg", "stock": 10},
+            {"name": "Asian Paints (10L)", "price": 3500, "image": "https://m.media-amazon.com/images/I/61pPpPpPpPL.jpg", "stock": 15},
+            {"name": "Teflon Tape (Roll)", "price": 40, "image": "https://m.media-amazon.com/images/I/41-t-t-t-tL.jpg", "stock": 100},
+            {"name": "LED Spotlight", "price": 450, "image": "https://m.media-amazon.com/images/I/51sSsSsSsSL.jpg", "stock": 20},
+            {"name": "Drill Machine Kit", "price": 2800, "image": "https://m.media-amazon.com/images/I/71dDdDdDdDL.jpg", "stock": 5}
+        ]
+    },
+    {
+        "name": "Students Book Depot",
+        "category": "Stationery",
+        "description": "School books, notebooks, and office stationery at competitive rates.",
+        "products": [
+            {"name": "Classmate Notebooks (6)", "price": 350, "image": "https://m.media-amazon.com/images/I/71nNnNnNnNL.jpg", "stock": 50},
+            {"name": "Parker Beta Pen", "price": 250, "image": "https://m.media-amazon.com/images/I/61pPpPpPpPL.jpg", "stock": 40},
+            {"name": "Art & Craft Kit", "price": 899, "image": "https://m.media-amazon.com/images/I/81aAaAaAaAL.jpg", "stock": 15},
+            {"name": "Geometry Box", "price": 180, "image": "https://m.media-amazon.com/images/I/61gGgGgGgGL.jpg", "stock": 30},
+            {"name": "Pocket Dictionary", "price": 120, "image": "https://m.media-amazon.com/images/I/61dDdDdDdDL.jpg", "stock": 20}
         ]
     }
 ]
 
 def seed_database():
-    print("🚀 Starting Database Seeding (Indian Stores)...")
+    print("Starting Database Seeding (Indian Stores)...")
     
     firebase = FirebaseService()
     qr_gen = QRGenerator()
@@ -123,13 +183,13 @@ def seed_database():
                 firebase.add_product(store_id, product_id, product_data)
                 
             created_count += 1
-            print(f"✅ Created Store: {store_info['name']}")
+            print(f"Completed Store: {store_info['name']}")
             
         except Exception as e:
-            print(f"❌ Error creating {store_info['name']}: {e}")
+            print(f"Error creating {store_info['name']}: {e}")
             
     print("\n" + "="*50)
-    print(f"🎉 Seeding Complete! Created {created_count} stores.")
+    print(f"Seeding Complete! Created {created_count} stores.")
     print("="*50)
 
 if __name__ == "__main__":

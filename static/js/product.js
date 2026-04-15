@@ -9,10 +9,12 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadProductDetails() {
     try {
         const response = await fetch(`/api/stores/${storeId}/products/${productId}`);
+        if (!response.ok) throw new Error('Failed to fetch product details');
         const product = await response.json();
 
         const productDetail = document.getElementById('product-detail');
-        const imageUrl = product.image || 'https://via.placeholder.com/400x400?text=No+Image';
+        const fallbackImg = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22400%22%20height%3D%22400%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22400%22%20height%3D%22400%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22Arial%22%20font-size%3D%2220%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%20fill%3D%22%23aaa%22%3ENo%20Image%20Available%3C%2Ftext%3E%3C%2Fsvg%3E';
+        const imageUrl = product.image || fallbackImg;
 
         const imgEl = document.getElementById('product-main-image');
         if (imgEl) imgEl.src = imageUrl;
@@ -40,8 +42,7 @@ async function loadProductDetails() {
         }
 
     } catch (error) {
-        console.error('Error loading product:', error);
-        // Fallback or error state can be handled here without wiping the whole page
+        // Fallback handled silently
     }
 }
 

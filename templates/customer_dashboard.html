@@ -4,19 +4,9 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Dashboard | Smart Retail Shopping</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dist.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: { primary: '#2e7d32', secondary: '#ef6c00', surface: '#fbfaf8', onSurface: '#333333' },
-                    fontFamily: { sans: ['Poppins', 'sans-serif'] }
-                }
-            }
-        }
-    </script>
     <style>
         .material-symbols-outlined { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
         .hero-pattern {
@@ -60,9 +50,12 @@
     <section class="hero-pattern rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-12 text-white shadow-xl relative overflow-hidden">
         <div class="relative z-10 max-w-2xl">
             <span class="uppercase tracking-widest text-xs font-bold bg-white/20 px-3 py-1 rounded-full mb-4 inline-block">The Process</span>
-            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 leading-tight">Direct from Villages<br/>to Your Local Mart.</h1>
-            <p class="text-green-100 text-sm sm:text-base mb-5 leading-relaxed max-w-lg">
-                Experience authentic Indian village craftsmanship. No middlemen — pure quality, fair trade directly from artisans and farmers.
+            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 leading-tight">Smart Shopping <br/>Made Easy.</h1>
+            <p class="text-green-100 text-sm sm:text-base mb-2 leading-relaxed max-w-lg">
+                Experience a new way of shopping that combines physical stores with digital convenience. Scan products directly in-store and manage your purchases easily.
+            </p>
+            <p class="text-white/70 text-xs sm:text-sm mb-5 leading-relaxed max-w-lg font-medium">
+                Shop smarter with real-time product details, quick checkout, and seamless experience.
             </p>
             <div class="flex flex-wrap gap-3">
                 <a href="{{ url_for('scanner_page') }}" class="bg-secondary hover:bg-orange-600 text-white font-bold py-2.5 px-5 rounded-xl flex items-center gap-2 transition-colors shadow-lg text-sm">

@@ -137,6 +137,10 @@ def api_login():
         session['email'] = email
         session['role'] = role
         
+        # Pre-cache store_id if it exists
+        if user.get('store_id'):
+            session['store_id'] = user.get('store_id')
+            
         return jsonify({
             'success': True,
             'user_id': user_id,
@@ -274,6 +278,9 @@ def stores_api():
         
         firebase.create_store(store_id, store_data)
         
+        # Link store to owner for O(1) retrieval
+        firebase.update_user(session['user_id'], {'store_id': store_id})
+        
         # Cache store_id in session for fast lookup
         session['store_id'] = store_id
         
@@ -297,7 +304,7 @@ def get_my_store_api():
     """Get the store owned by the current user"""
     user_id = session['user_id']
     
-    # Fast path: use session-cached store_id
+    # 1. Fast path: use session-cached store_id
     cached_store_id = session.get('store_id')
     if cached_store_id:
         store_data = firebase.get_store(cached_store_id)
@@ -305,18 +312,28 @@ def get_my_store_api():
             store_data['id'] = cached_store_id
             return jsonify(store_data)
     
-    # Fallback: scan all stores
-    stores = firebase.get_all_stores()
-    if not stores or not isinstance(stores, dict):
-        return jsonify(None)
-        
-    for store_id, store_data in stores.items():
-        if not isinstance(store_data, dict):
-            continue
-        if store_data.get('owner_id') == user_id:
+    # 2. Medium path: check user profile
+    user_data = firebase.get_user(user_id)
+    if user_data and isinstance(user_data, dict) and user_data.get('store_id'):
+        store_id = user_data.get('store_id')
+        store_data = firebase.get_store(store_id)
+        if isinstance(store_data, dict) and store_data.get('owner_id') == user_id:
             store_data['id'] = store_id
-            session['store_id'] = store_id  # cache it
+            session['store_id'] = store_id
             return jsonify(store_data)
+    
+    # 3. Slow Fallback: scan (for legacy data)
+    stores = firebase.get_all_stores()
+    if not stores or not isinstance(stores, dict): return jsonify(None)
+        
+    for sid, sdata in stores.items():
+        if not isinstance(sdata, dict): continue
+        if sdata.get('owner_id') == user_id:
+            sdata['id'] = sid
+            session['store_id'] = sid
+            # Fix profile
+            firebase.update_user(user_id, {'store_id': sid})
+            return jsonify(sdata)
             
     return jsonify(None)
 
@@ -457,29 +474,57 @@ def cart_api():
     
     elif request.method == 'POST':
         data = request.json
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+            
         product_id = data.get('product_id')
         store_id = data.get('store_id')
+        quantity = data.get('quantity', 1)
         
-        if (not product_name or price is None) and not store_id:
-            # Partial update (e.g. from +/- buttons in cart)
-            # Use PATCH to only update quantity without destroying metadata
+        # Extract metadata if provided
+        product_name = data.get('product_name')
+        price = data.get('price')
+        image = data.get('image', '')
+        
+        if not product_id:
+            return jsonify({'error': 'Product ID is required'}), 400
+
+        # Check if we need to fetch missing metadata
+        if (not product_name or price is None) and store_id:
+            product_data = firebase.get_product(store_id, product_id)
+            
+            if product_data and isinstance(product_data, dict) and 'error' not in product_data:
+                product_name = product_data.get('name')
+                price = product_data.get('price')
+                image = product_data.get('image', '')
+            else:
+                # Fallback to global search if store_id was wrong or product not found
+                found_store_id, product_data = firebase.get_product_by_global_id(product_id)
+                if product_data:
+                    product_name = product_data.get('name')
+                    price = product_data.get('price')
+                    image = product_data.get('image', '')
+                    if not store_id: store_id = found_store_id
+
+        # Determine if it's a full item add or just a quantity update
+        if product_name and price is not None:
+            # Full add/replace
+            cart_item = {
+                'store_id': store_id,
+                'product_name': product_name,
+                'price': price,
+                'quantity': quantity,
+                'image': image,
+                'added_at': datetime.now().isoformat()
+            }
+            firebase.add_to_cart(user_id, product_id, cart_item)
+        else:
+            # Partial update (quantitiy only)
             firebase.update_cart_item(user_id, product_id, {
-                'quantity': data.get('quantity', 1),
+                'quantity': quantity,
                 'updated_at': datetime.now().isoformat()
             })
-            return jsonify({'success': True})
-
-        # Full add/replace
-        cart_item = {
-            'store_id': store_id,
-            'product_name': product_name,
-            'price': price,
-            'quantity': data.get('quantity', 1),
-            'image': image or '',
-            'added_at': datetime.now().isoformat()
-        }
-        
-        firebase.add_to_cart(user_id, product_id, cart_item)
+            
         return jsonify({'success': True})
     
     elif request.method == 'DELETE':
@@ -540,42 +585,61 @@ def create_order_api():
     }
     
     # Create order
-    firebase.create_order(order_id, order_data)
-    
-    # Add to user's orders
-    firebase.add_order_to_user(user_id, order_id, {
-        'total': order_data['total'],
-        'created_at': order_data['created_at'],
-        'status': 'confirmed'
-    })
-    
-    # Add to relevant stores
-    items = data.get('items', [])
-    store_orders = {}
-    
-    for item in items:
-        store_id = item.get('store_id')
-        if store_id:
-            if store_id not in store_orders:
-                store_orders[store_id] = {'items': [], 'total': 0}
-            store_orders[store_id]['items'].append(item)
-            store_orders[store_id]['total'] += float(item.get('price', 0)) * int(item.get('quantity', 1))
-            
-    customer_email = session.get('email', 'Unknown')
-
-    for s_id, s_data in store_orders.items():
-        firebase.add_order_to_store(s_id, order_id, {
-            'user_id': user_id,
-            'customer_email': customer_email,
-            'items': s_data['items'],
-            'total': s_data['total'],
-            'payment_method': order_data['payment_method'],
-            'status': 'confirmed',
-            'created_at': order_data['created_at']
+    try:
+        firebase.create_order(order_id, order_data)
+        
+        # Add to user's orders
+        firebase.add_order_to_user(user_id, order_id, {
+            'total': order_data['total'],
+            'created_at': order_data['created_at'],
+            'status': 'confirmed'
         })
-    
-    firebase.clear_cart(user_id)
-    return jsonify({'success': True, 'order_id': order_id})
+        
+        # Add to relevant stores
+        items = data.get('items', [])
+        store_orders = {}
+        
+        for item in items:
+            store_id = item.get('store_id')
+            if store_id:
+                if store_id not in store_orders:
+                    store_orders[store_id] = {'items': [], 'total': 0}
+                
+                # Defensive parsing of price and quantity
+                try:
+                    p_str = str(item.get('price', 0)).replace('₹', '').replace(',', '').strip()
+                    price = float(p_str)
+                    qty = int(item.get('quantity', 1))
+                except (ValueError, TypeError):
+                    price = 0
+                    qty = 1
+                    
+                store_orders[store_id]['items'].append(item)
+                store_orders[store_id]['total'] += price * qty
+                
+        customer_email = session.get('email', 'Unknown')
+
+        for s_id, s_data in store_orders.items():
+            try:
+                firebase.add_order_to_store(s_id, order_id, {
+                    'user_id': user_id,
+                    'customer_email': customer_email,
+                    'items': s_data['items'],
+                    'total': s_data['total'],
+                    'payment_method': order_data['payment_method'],
+                    'status': 'confirmed',
+                    'created_at': order_data['created_at']
+                })
+            except Exception as e:
+                print(f"Error notifying store {s_id}: {e}")
+                
+        # CRITICAL: Always clear cart after order processing attempts
+        firebase.clear_cart(user_id)
+        return jsonify({'success': True, 'order_id': order_id})
+        
+    except Exception as e:
+        print(f"Order creation error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/orders/<order_id>', methods=['GET'])
 @login_required

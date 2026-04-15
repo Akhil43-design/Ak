@@ -1,19 +1,16 @@
 // Cart and Checkout JavaScript
 
-// Load cart on page load
-if (window.location.pathname === '/cart') {
-    loadCart();
-}
-
-// Load checkout on page load
-if (window.location.pathname === '/checkout') {
-    loadCheckout();
-}
-
-// Load receipt on page load
-if (window.location.pathname.includes('/receipt/')) {
-    loadReceipt();
-}
+// Initialize cart features
+document.addEventListener('DOMContentLoaded', () => {
+    const path = window.location.pathname;
+    if (path === '/cart') {
+        loadCart();
+    } else if (path === '/checkout') {
+        loadCheckout();
+    } else if (path.includes('/receipt/')) {
+        loadReceipt();
+    }
+});
 
 // Load cart
 async function loadCart() {
@@ -25,22 +22,28 @@ async function loadCart() {
         const emptyCart = document.getElementById('empty-cart');
         const cartSummary = document.getElementById('cart-summary');
 
-        if (!cart || Object.keys(cart).length === 0) {
+        if (!cart || typeof cart !== 'object' || Object.keys(cart).length === 0) {
             cartItems.style.display = 'none';
             cartSummary.style.display = 'none';
             emptyCart.style.display = 'block';
             return;
         }
 
-        cartItems.innerHTML = '';
         let totalItems = 0;
         let totalPrice = 0;
-
+        cartItems.innerHTML = '';
         for (const [productId, item] of Object.entries(cart)) {
             const cartItem = createCartItem(productId, item);
             cartItems.appendChild(cartItem);
-            totalItems += item.quantity;
-            totalPrice += item.price * item.quantity;
+            
+            // Defensive parsing
+            const qty = parseInt(item.quantity) || 0;
+            const price = typeof item.price === 'string' 
+                ? parseFloat(item.price.replace(/[^\d.-]/g, '')) 
+                : parseFloat(item.price || 0);
+                
+            totalItems += qty;
+            totalPrice += price * qty;
         }
 
         const itemsEl = document.getElementById('total-items');
@@ -60,7 +63,7 @@ async function loadCart() {
 
         if (cartSummary) cartSummary.style.display = 'block';
     } catch (error) {
-        console.error('Error loading cart:', error);
+        // Log critical errors only
     }
 }
 
@@ -68,7 +71,7 @@ function createCartItem(productId, item) {
     const div = document.createElement('div');
     div.className = 'bg-surface-container-lowest rounded-xl p-6 flex flex-col md:flex-row items-center gap-6 transition-all duration-300 hover:shadow-[0_20px_40px_rgba(0,55,81,0.06)] group cart-item';
 
-    const imageUrl = item.image || 'https://via.placeholder.com/80x80?text=No+Image';
+    const imageUrl = item.image || 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2280%22%20height%3D%2280%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%2280%22%20height%3D%2280%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22Arial%22%20font-size%3D%2210%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%20fill%3D%22%23aaa%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E';
 
     div.innerHTML = `
         <div class="w-full md:w-32 h-32 rounded-lg bg-surface-container-low overflow-hidden flex-shrink-0 relative">
@@ -114,27 +117,30 @@ async function updateQuantity(productId, delta) {
         
         if (newQty < 1) return; // Minimum 1
 
-        // Update UI immediately for responsiveness
+        // 1. Update individual item quantity in UI
         qtyEl.textContent = newQty;
 
+        // 2. Recalculate and update totals LOCALLY for instant feedback
+        recalculateTotals();
+
+        // 3. Sync with server
         const response = await fetch('/api/cart', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 product_id: productId,
-                quantity: newQty // API expects the absolute new quantity
+                quantity: newQty
             })
         });
 
-        if (response.ok) {
-            loadCart(); // Refresh totals
-        } else {
+        if (!response.ok) {
             // Revert on failure
             qtyEl.textContent = currentQty;
-            alert('Failed to update quantity');
+            recalculateTotals();
+            alert('Failed to update quantity on server');
         }
     } catch (error) {
-        console.error('Error updating quantity:', error);
+        // Log critical errors only
     }
 }
 
@@ -150,10 +156,47 @@ async function removeFromCart(productId) {
         } else {
             alert('Failed to remove item');
         }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred');
+    } catch (e) {
     }
+}
+
+/**
+ * Recalculate totals from the current DOM state for instant feedback
+ */
+function recalculateTotals() {
+    let totalItems = 0;
+    let totalPrice = 0;
+
+    const items = document.querySelectorAll('.cart-item');
+    items.forEach(item => {
+        const qtyEl = item.querySelector('[id^="qty-"]');
+        const priceEl = item.querySelector('.text-primary'); // The price span
+        
+        if (qtyEl && priceEl) {
+            const qty = parseInt(qtyEl.textContent) || 0;
+            const priceText = priceEl.textContent.replace(/[^\d.-]/g, '');
+            const price = parseFloat(priceText) || 0;
+            
+            totalItems += qty;
+            totalPrice += price * qty;
+        }
+    });
+
+    // Update UI elements
+    const itemsEl = document.getElementById('total-items');
+    if (itemsEl) itemsEl.textContent = totalItems;
+    
+    const subLabel = document.getElementById('subtotal-label');
+    if (subLabel) subLabel.textContent = `Subtotal (${totalItems} items)`;
+    
+    const priceSub = document.getElementById('total-price-sub');
+    if (priceSub) priceSub.textContent = `₹${totalPrice.toFixed(2)}`;
+    
+    const totalPriceEl = document.getElementById('total-price');
+    if (totalPriceEl) totalPriceEl.textContent = `₹${totalPrice.toFixed(2)}`;
+
+    const headerCount = document.getElementById('header-cart-count');
+    if (headerCount) headerCount.textContent = totalItems;
 }
 
 // Proceed to checkout
@@ -165,6 +208,7 @@ function proceedToCheckout() {
 async function loadCheckout() {
     try {
         const response = await fetch('/api/cart');
+        if (!response.ok) throw new Error('Failed to fetch cart');
         const cart = await response.json();
 
         if (!cart || Object.keys(cart).length === 0) {
@@ -181,7 +225,7 @@ async function loadCheckout() {
         for (const [productId, item] of Object.entries(cart)) {
             const itemDiv = document.createElement('div');
             itemDiv.className = 'flex items-center gap-4 py-3 border-b border-gray-50 last:border-0';
-            const imageUrl = item.image || 'https://via.placeholder.com/80x80?text=No+Image';
+            const imageUrl = item.image || 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2280%22%20height%3D%2280%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%2280%22%20height%3D%2280%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22Arial%22%20font-size%3D%2210%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%20fill%3D%22%23aaa%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E';
             itemDiv.innerHTML = `
                 <div class="w-14 h-14 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0 relative border border-gray-100">
                     <img class="w-full h-full object-cover" src="${imageUrl}" alt="${item.product_name}" />

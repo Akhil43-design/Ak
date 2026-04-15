@@ -15,6 +15,10 @@ class FirebaseService:
         """Construct Firebase REST API URL"""
         return f"{self.db_url}/{path}.json"
     
+    def _safe_key(self, key):
+        """Make key safe for Firebase (no periods allowed)"""
+        return key.replace('.', ',').replace('@', '+').replace('$', '-').replace('#', '-').replace('[', '(').replace(']', ')')
+    
     # ========== USER OPERATIONS ==========
     
     def create_user(self, user_id, email, role):
@@ -28,6 +32,12 @@ class FirebaseService:
         }
         url = self._get_url(f"users/{user_id}")
         response = requests.put(url, json=user_data)
+        
+        # Add to email index for fast lookup
+        if email:
+            index_url = self._get_url(f"lookup/emails/{self._safe_key(email)}")
+            requests.put(index_url, json=user_id)
+            
         return response.json()
     
     def get_user(self, user_id):
@@ -35,8 +45,25 @@ class FirebaseService:
         url = self._get_url(f"users/{user_id}")
         response = requests.get(url)
         return response.json()
+        
+    def update_user(self, user_id, user_data):
+        """Update user data"""
+        url = self._get_url(f"users/{user_id}")
+        response = requests.patch(url, json=user_data)
+        return response.json()
     def get_user_by_email(self, email):
-        """Get user data by email (scan all users - inefficient but works for demo)"""
+        """Get user data by email (O(1) powered by lookup index)"""
+        if not email: return None
+        
+        # Try fast lookup first
+        index_url = self._get_url(f"lookup/emails/{self._safe_key(email)}")
+        response = requests.get(index_url)
+        user_id = response.json()
+        
+        if user_id and isinstance(user_id, str):
+            return self.get_user(user_id)
+            
+        # Fallback to slow scan (only for legacy data or if index fails)
         url = self._get_url("users")
         response = requests.get(url)
         users = response.json()
@@ -44,12 +71,12 @@ class FirebaseService:
         if not users or not isinstance(users, dict):
             return None
             
-        for user_id, user_data in users.items():
-            # Skip non-dict entries (e.g. metadata strings)
-            if not isinstance(user_data, dict):
-                continue
+        for uid, user_data in users.items():
+            if not isinstance(user_data, dict): continue
             if user_data.get('email') == email:
-                user_data['user_id'] = user_id
+                user_data['user_id'] = uid
+                # Backfill index
+                requests.put(index_url, json=uid)
                 return user_data
         
         return None
@@ -79,6 +106,16 @@ class FirebaseService:
         """Add a product to a store"""
         url = self._get_url(f"stores/{store_id}/products/{product_id}")
         response = requests.put(url, json=product_data)
+        
+        # Add to global product index for fast lookup
+        index_url = self._get_url(f"lookup/products/{product_id}")
+        index_data = {
+            "store_id": store_id,
+            "name": product_data.get('name'),
+            "price": product_data.get('price')
+        }
+        requests.put(index_url, json=index_data)
+        
         return response.json()
     
     def get_products(self, store_id):
@@ -108,21 +145,39 @@ class FirebaseService:
 
     def get_product_by_global_id(self, product_id):
         """
-        Find a product by ID across ALL stores (inefficient but necessary for global ID lookup)
+        Find a product by ID across ALL stores (O(1) powered by lookup index)
         Returns (store_id, product_data) or (None, None)
         """
+        if not product_id: return None, None
+        
+        # Try fast lookup first
+        index_url = self._get_url(f"lookup/products/{product_id}")
+        response = requests.get(index_url)
+        index_data = response.json()
+        
+        if index_data and isinstance(index_data, dict) and 'store_id' in index_data:
+            store_id = index_data['store_id']
+            product = self.get_product(store_id, product_id)
+            if product:
+                return store_id, product
+                
+        # Fallback to slow scan (for legacy data)
         all_stores = self.get_all_stores()
         if not all_stores or not isinstance(all_stores, dict): return None, None
         
         for store_id, store_data in all_stores.items():
-            if not isinstance(store_data, dict):
-                continue
+            if not isinstance(store_data, dict): continue
             products = store_data.get('products', {})
-            if not isinstance(products, dict):
-                continue
+            if not isinstance(products, dict): continue
             if product_id in products:
-                # Found it!
-                return store_id, products[product_id]
+                # Found it! Backfill index
+                prod_data = products[product_id]
+                requests.put(index_url, json={
+                    "store_id": store_id,
+                    "name": prod_data.get('name'),
+                    "price": prod_data.get('price')
+                })
+                return store_id, prod_data
         
         return None, None
     

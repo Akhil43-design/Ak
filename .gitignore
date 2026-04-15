@@ -39,3 +39,4 @@ ENV/
 *.qr.png
 qrcodes/
 *.log
+node_modules/
