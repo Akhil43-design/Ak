@@ -71,7 +71,7 @@ function createCartItem(productId, item) {
     const div = document.createElement('div');
     div.className = 'bg-surface-container-lowest rounded-xl p-6 flex flex-col md:flex-row items-center gap-6 transition-all duration-300 hover:shadow-[0_20px_40px_rgba(0,55,81,0.06)] group cart-item';
 
-    const imageUrl = item.image || 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2280%22%20height%3D%2280%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%2280%22%20height%3D%2280%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22Arial%22%20font-size%3D%2210%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%20fill%3D%22%23aaa%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E';
+    const imageUrl = item.image || '/static/images/products/default.png';
 
     div.innerHTML = `
         <div class="w-full md:w-32 h-32 rounded-lg bg-surface-container-low overflow-hidden flex-shrink-0 relative">
@@ -225,7 +225,7 @@ async function loadCheckout() {
         for (const [productId, item] of Object.entries(cart)) {
             const itemDiv = document.createElement('div');
             itemDiv.className = 'flex items-center gap-4 py-3 border-b border-gray-50 last:border-0';
-            const imageUrl = item.image || 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2280%22%20height%3D%2280%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%2280%22%20height%3D%2280%22%20fill%3D%22%23eee%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20font-family%3D%22Arial%22%20font-size%3D%2210%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%20fill%3D%22%23aaa%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E';
+            const imageUrl = item.image || '/static/images/products/default.png';
             itemDiv.innerHTML = `
                 <div class="w-14 h-14 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0 relative border border-gray-100">
                     <img class="w-full h-full object-cover" src="${imageUrl}" alt="${item.product_name}" />

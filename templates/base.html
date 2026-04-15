@@ -125,7 +125,29 @@
     </footer>
 
     {% block scripts %}{% endblock %}
-<script src="/static/js/buttons.js"></script>
+    
+    <!-- Global Image Fallback & Optimization -->
+    <script>
+        document.addEventListener('error', function (event) {
+            if (event.target.tagName.toLowerCase() === 'img') {
+                const img = event.target;
+                const fallbackStore = '/static/images/stores/default.png';
+                const fallbackProduct = '/static/images/products/default.png';
+                
+                // Determine which fallback to use based on class or parent
+                if (img.classList.contains('store-img') || img.closest('.store-card')) {
+                    if (img.src !== window.location.origin + fallbackStore) {
+                        img.src = fallbackStore;
+                    }
+                } else {
+                    if (img.src !== window.location.origin + fallbackProduct) {
+                        img.src = fallbackProduct;
+                    }
+                }
+            }
+        }, true);
+    </script>
+    <script src="/static/js/buttons.js"></script>
 </body>
 
 </html>

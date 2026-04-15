@@ -40,11 +40,11 @@ function renderStores(stores) {
         card.onclick = () => window.location.href = `/store/${id}`;
 
         const firstLetter = store.name ? store.name.charAt(0).toUpperCase() : 'S';
-        const storeImageUrl = 'https://lh3.googleusercontent.com/aida-public/AB6AXuBh2qcWDieHtFTcaCX9BaROMMfeKS7lkvc3MtUlhCDusVGt4qHc30kteZSD5sVDGBLzX8XsnsBjBsK8w_3UhHG8o4shJMFxLmFVAt1y8mchb1Yv627sJl2FNmI6g8cFazy2ZgtZtNwxnbGnjKWckqRynmXnQTcOvtvbJbYvBAKzfZ46ezC7KRcs7hXYKJCkgDAZadcS94Xnja9Az4VUMt_Vc9Hwi6l6PuV0S7OU-pOJWR9PB2slDN4DPnr2l_1RbGHSU8mUsVRyzYaJ';
+        const storeImageUrl = store.image || '/static/images/stores/default.png';
         
         card.innerHTML = `
             <div class="h-32 w-full overflow-hidden">
-                <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src="${storeImageUrl}" loading="lazy"/>
+                <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 store-img" src="${storeImageUrl}" loading="lazy"/>
             </div>
             <div class="p-6 pt-0 mt-[-24px] relative">
                 <div class="w-16 h-16 rounded-2xl bg-white p-1 ethereal-shadow mb-3 flex items-center justify-center text-primary font-bold text-2xl">
