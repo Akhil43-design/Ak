@@ -44,7 +44,10 @@ class FirebaseService:
         """Get user data"""
         url = self._get_url(f"users/{user_id}")
         response = requests.get(url)
-        return response.json()
+        data = response.json()
+        if data and isinstance(data, dict):
+            data['user_id'] = user_id
+        return data
         
     def update_user(self, user_id, user_data):
         """Update user data"""
@@ -61,7 +64,10 @@ class FirebaseService:
         user_id = response.json()
         
         if user_id and isinstance(user_id, str):
-            return self.get_user(user_id)
+            user_data = self.get_user(user_id)
+            if user_data:
+                user_data['user_id'] = user_id
+            return user_data
             
         # Fallback to slow scan (only for legacy data or if index fails)
         url = self._get_url("users")

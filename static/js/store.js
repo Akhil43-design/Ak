@@ -10,24 +10,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ─── STORE CHECK ─────────────────────────────────────────────
 async function checkStoreRegistration() {
-    // 1. Fast path: localStorage cache
-    const cachedId = localStorage.getItem('srs_store_id');
-    if (cachedId) {
-        currentStoreId = cachedId;
-        loadProducts();
-        loadAnalytics();
-        loadRequests();
-        loadOrders();
-        return;
-    }
-    // 2. Ask server
+    // Rely exclusively on server-side session/profile for store identification
     try {
         const res = await fetch('/api/my-store');
         if (!res.ok) throw new Error('Server error');
         const store = await res.json();
         if (store && store.id) {
             currentStoreId = store.id;
-            localStorage.setItem('srs_store_id', store.id);
             loadProducts();
             loadAnalytics();
             loadRequests();
@@ -98,7 +87,6 @@ async function handleStoreRegistration(e) {
         const data = await res.json();
         if (data.success) {
             currentStoreId = data.store_id;
-            localStorage.setItem('srs_store_id', data.store_id);
             document.getElementById('registerStoreModal').remove();
             loadProducts();
             loadAnalytics();

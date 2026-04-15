@@ -169,6 +169,9 @@ def seed_database():
             }
             firebase.create_store(store_id, store_data)
             
+            # 2.1 Link store to owner for fast dashboard retrieval
+            firebase.update_user(owner_id, {'store_id': store_id})
+            
             # 3. Add Products
             for prod in store_info['products']:
                 product_id = str(uuid.uuid4())
