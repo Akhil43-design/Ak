@@ -43,8 +43,8 @@ function renderStores(stores) {
         const storeImageUrl = store.image || '/static/images/stores/default.png';
         
         card.innerHTML = `
-            <div class="h-32 w-full overflow-hidden">
-                <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 store-img" src="${storeImageUrl}" loading="lazy"/>
+            <div class="h-32 w-full bg-slate-50 flex items-center justify-center opacity-50">
+                <span class="material-symbols-outlined text-outline text-5xl">storefront</span>
             </div>
             <div class="p-6 pt-0 mt-[-24px] relative">
                 <div class="w-16 h-16 rounded-2xl bg-white p-1 ethereal-shadow mb-3 flex items-center justify-center text-primary font-bold text-2xl">

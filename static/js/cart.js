@@ -74,9 +74,8 @@ function createCartItem(productId, item) {
     const imageUrl = item.image || '/static/images/products/default.png';
 
     div.innerHTML = `
-        <div class="w-full md:w-32 h-32 rounded-lg bg-surface-container-low overflow-hidden flex-shrink-0 relative">
-            <div class="absolute inset-0 bg-primary-container opacity-5"></div>
-            <img alt="${item.product_name}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="${imageUrl}"/>
+        <div class="w-full md:w-32 h-32 rounded-lg bg-surface-container-low flex items-center justify-center flex-shrink-0 relative">
+            <span class="material-symbols-outlined text-outline text-4xl">inventory_2</span>
         </div>
         <div class="flex-grow space-y-1 w-full">
             <div class="flex justify-between items-start">
@@ -227,8 +226,8 @@ async function loadCheckout() {
             itemDiv.className = 'flex items-center gap-4 py-3 border-b border-gray-50 last:border-0';
             const imageUrl = item.image || '/static/images/products/default.png';
             itemDiv.innerHTML = `
-                <div class="w-14 h-14 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0 relative border border-gray-100">
-                    <img class="w-full h-full object-cover" src="${imageUrl}" alt="${item.product_name}" />
+                <div class="w-14 h-14 bg-gray-50 rounded-xl flex items-center justify-center flex-shrink-0 relative border border-gray-100">
+                    <span class="material-symbols-outlined text-outline text-2xl">shopping_cart</span>
                 </div>
                 <div class="flex-1 min-w-0">
                     <h4 class="text-xs font-bold text-gray-800 truncate">${item.product_name}</h4>

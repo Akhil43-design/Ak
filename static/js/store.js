@@ -214,10 +214,9 @@ async function loadProducts() {
 
         container.innerHTML = `<div class="space-y-3">${products.map(p => `
             <div class="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors group">
-                ${p.image
-                    ? `<img src="${p.image}" class="w-14 h-14 rounded-xl object-cover bg-gray-100 flex-shrink-0"/>`
-                    : `<div class="w-14 h-14 rounded-xl bg-green-50 flex items-center justify-center text-green-600 flex-shrink-0"><span class="material-symbols-outlined">inventory_2</span></div>`
-                }
+                <div class="w-14 h-14 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 flex-shrink-0">
+                    <span class="material-symbols-outlined text-2xl">inventory_2</span>
+                </div>
                 <div class="flex-1 min-w-0">
                     <p class="font-bold text-gray-800 truncate">${p.name || 'Unknown'}</p>
                     <p class="text-xs text-gray-500">${p.category || ''} ${p.size ? '· ' + p.size : ''}</p>
